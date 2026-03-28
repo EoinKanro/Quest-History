@@ -1,0 +1,8 @@
+## Interface: 120001
+## Version: 1.0.0
+## Title: Quest History
+## Author: EoinKanro
+## SavedVariables: QuestHistoryNpcDB
+## SavedVariablesPerCharacter: QuestHistoryDB
+
+QuestHistory.lua
