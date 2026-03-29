@@ -63,6 +63,28 @@ do
 	Settings.CreateCheckbox(category, setting, tooltip)
 end
 
+do
+	local name = "Enable debug logging"
+	local variable = "QuestHistory_EnableDebugLogging"
+	local defaultValue = false
+
+	local function GetValue()
+        if QuestHistorySettingsDB.enableDebugLogging == nil then
+            return defaultValue
+        end
+        return QuestHistorySettingsDB.enableDebugLogging
+    end
+
+    local function SetValue(value)
+    	QuestHistorySettingsDB.enableDebugLogging = value
+    end
+
+    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+	local tooltip = "Log additional info to chat"
+	Settings.CreateCheckbox(category, setting, tooltip)
+end
+
 Settings.RegisterAddOnCategory(category)
 
 -- =========================
@@ -128,7 +150,7 @@ function QH.ReloadChatLogging(value)
     end
 
     LoggingChat(value)
-    if value then
+    if value == true then
         QH.LogInfo("Chat logging activated")
     else
         QH.LogInfo("Chat logging deactivated")
@@ -175,12 +197,19 @@ frame:SetScript("OnEvent", function(_, event, ...)
         local location = GetZoneText()
         lastQuestGiver = nil
 
-        QuestHistoryTitleDB[questId] = title
-        QuestHistoryNpcDB[questId] = npcName
-        QuestHistoryLocationDB[questId] = location
-
+        if title then
+            QuestHistoryTitleDB[questId] = title
+        end
         if npcName then
-            QH.LogInfo("Quest: " .. questId .. " Npc: " .. npcName .. " Location: " .. location)
+            QuestHistoryNpcDB[questId] = npcName
+        end
+        if location then
+            QuestHistoryLocationDB[questId] = location
+        end
+
+        local enableDebugLogging = QuestHistorySettingsDB.enableDebugLogging
+        if enableDebugLogging == true then
+            QH.LogInfo("Quest: " .. questId .. " Title:" .. title .. " Npc: " .. npcName .. " Location: " .. location)
         end
         return
     end
