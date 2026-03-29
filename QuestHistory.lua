@@ -116,11 +116,11 @@ function QH.SaveQuest(questId)
 
     local enableLogBackup = QuestHistorySettingsDB.enableLogBackup
     if enableLogBackup == true then
-        SendChatMessage("[QH] " .. entry, "WHISPER", nil, UnitName("player"))
+        SendChatMessage("[QH] " .. questId, "WHISPER", nil, UnitName("player"))
     end
 
     table.insert(QuestHistoryDB, entry)
-    QH.LogInfo("Saved " .. entry)
+    QH.LogInfo("Saved " .. questId)
 end
 
 -- =========================
@@ -210,7 +210,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
 
         local enableDebugLogging = QuestHistorySettingsDB.enableDebugLogging
         if enableDebugLogging == true then
-            QH.LogInfo("Quest: " .. questId .. " Title:" .. title .. " Npc: " .. npcName .. " Location: " .. location)
+            QH.LogInfo("Quest: " .. questId .. "; Title: " .. title .. "; Npc: " .. npcName .. "; Location: " .. location)
         end
         return
     end
