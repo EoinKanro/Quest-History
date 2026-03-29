@@ -2,7 +2,7 @@
 ## Version: 1.0.0
 ## Title: Quest History
 ## Author: EoinKanro
-## SavedVariables: QuestHistoryNpcDB, QuestHistoryLocationDB
+## SavedVariables: QuestHistoryNpcDB, QuestHistoryLocationDB, QuestHistoryTitleDB
 ## SavedVariablesPerCharacter: QuestHistoryDB, QuestHistorySettingsDB
 
 QuestHistoryUtils.lua

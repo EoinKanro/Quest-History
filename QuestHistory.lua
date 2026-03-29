@@ -7,6 +7,7 @@ if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
 
 if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
 if not QuestHistoryLocationDB then QuestHistoryLocationDB = {} end
+if not QuestHistoryTitleDB then QuestHistoryTitleDB = {} end
 
 -- =========================
 -- Settings
@@ -73,7 +74,7 @@ function QH.SaveQuest(questId)
         return
     end
 
-    local title = C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title"
+    local title = QuestHistoryTitleDB[questId] or C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title"
     local location = QuestHistoryLocationDB[questId] or GetZoneText() or "Unknown Zone"
     local giver = QuestHistoryNpcDB[questId] or UnitName("target") or "Unknown NPC"
 
@@ -157,7 +158,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
     end
 
     -- =========================
-    -- Save quest givers and locations
+    -- Save quest titles, givers and locations
     -- =========================
     if event == "QUEST_DETAIL" then
         lastQuestGiver = UnitName("target")
@@ -169,13 +170,17 @@ frame:SetScript("OnEvent", function(_, event, ...)
         questId = questId or GetQuestID()
         QH.LogInfo("Quest accepted " .. questId)
 
+        local title = C_QuestLog.GetTitleForQuestID(questId)
         local npcName = lastQuestGiver or UnitName("target")
         local location = GetZoneText()
         lastQuestGiver = nil
+
+        QuestHistoryTitleDB[questId] = title
+        QuestHistoryNpcDB[questId] = npcName
+        QuestHistoryLocationDB[questId] = location
+
         if npcName then
             QH.LogInfo("Quest: " .. questId .. " Npc: " .. npcName .. " Location: " .. location)
-            QuestHistoryNpcDB[questId] = npcName
-            QuestHistoryLocationDB[questId] = location
         end
         return
     end
