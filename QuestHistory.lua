@@ -4,6 +4,38 @@
 if not QH then QH = {} end
 if not QuestHistoryDB then QuestHistoryDB = {} end
 if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
+if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
+
+-- =========================
+-- Settings
+-- =========================
+local category = Settings.RegisterVerticalLayoutCategory("Quest History")
+
+do
+	local name = "Enable backup to chat log"
+	local variable = "QuestHistory_EnableLogBackup"
+	local defaultValue = false
+
+	local function GetValue()
+    	return QuestHistorySettingsDB.enableLogBackup or defaultValue
+    end
+
+    local function SetValue(value)
+    	QuestHistorySettingsDB.enableLogBackup = value
+    end
+
+    local function OnSettingChanged(_, value)
+	    QH.ReloadChatLogging(value)
+    end
+
+    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+    setting:SetValueChangedCallback(OnSettingChanged)
+
+	local tooltip = "Backup info about completed quests to chat log. If switched off, you can lose your data if game crashes"
+	Settings.CreateCheckbox(category, setting, tooltip)
+end
+
+Settings.RegisterAddOnCategory(category)
 
 -- =========================
 -- Save quest to database and chat log
@@ -46,6 +78,25 @@ function QH.SaveCurrentQuest()
         QH.SaveQuest(questId)
     else
        QH.LogError("No active quest. Talk to NPC or open quest log")
+    end
+end
+
+-- =========================
+-- Enable or disable chat logging
+-- =========================
+function QH.ReloadChatLogging(value)
+    if value == nil then
+        value = QuestHistorySettingsDB.enableLogBackup
+    end
+    if value == nil then
+        value = true
+    end
+
+    LoggingChat(value)
+    if value then
+        QH.LogInfo("Chat logging activated")
+    else
+        QH.LogInfo("Chat logging deactivated")
     end
 end
 
@@ -97,8 +148,7 @@ frame:SetScript("OnEvent", function(_, event, ...)
     -- Auto enable chat log for backup in case game crashes
     -- =========================
     if event == "PLAYER_LOGIN" then
-        LoggingChat(true)
-        QH.LogInfo("Chat logging activated")
+        QH.ReloadChatLogging()
         return
     end
 end)
