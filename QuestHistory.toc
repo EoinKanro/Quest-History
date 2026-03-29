@@ -5,4 +5,5 @@
 ## SavedVariables: QuestHistoryNpcDB
 ## SavedVariablesPerCharacter: QuestHistoryDB
 
+QuestHistoryUtils.lua
 QuestHistory.lua

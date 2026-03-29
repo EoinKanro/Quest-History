@@ -1,18 +1,18 @@
--- 1. Global object
-QH = {}
-
-local f = CreateFrame("Frame")
-
+-- =========================
+-- Global Objects
+-- =========================
+if not QH then QH = {} end
 if not QuestHistoryDB then QuestHistoryDB = {} end
 if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
+
+local f = CreateFrame("Frame")
 
 -- =========================
 -- Save quest to database and chat log
 -- =========================
-
 function QH.SaveQuest(questId)
     if not questId or questId == 0 then
-        print("|cFFFF0000[QH Error]:|r Can't process quest")
+        QH.LogError("Can't process quest")
         return
     end
 
@@ -25,14 +25,14 @@ function QH.SaveQuest(questId)
     -- duplicate check (still simple)
     for _, v in ipairs(QuestHistoryDB) do
         if v == entry then
-            print("|cFFFFFF00[QH Error]:|r " .. entry .. " has been already saved")
+            QH.LogError(entry .. " has been already saved")
             return
         end
     end
 
     SendChatMessage("[QH] " .. entry, "WHISPER", nil, UnitName("player"))
     table.insert(QuestHistoryDB, entry)
-    print("|cFF00FF00[QH]:|r Saved " .. entry)
+    QH.LogInfo("Saved " .. entry)
 end
 
 -- =========================
@@ -47,7 +47,7 @@ function QH.SaveCurrentQuest()
     if questId and questId > 0 then
         QH.SaveQuest(questId)
     else
-        print("|cFFFF0000[QH Error]:|r No active quest. Talk to NPC or open quest log")
+       QH.LogError("No active quest. Talk to NPC or open quest log")
     end
 end
 
@@ -64,7 +64,7 @@ f:SetScript("OnEvent", function(_, event, ...)
     -- =========================
     if event == "PLAYER_LOGIN" then
         LoggingChat(true)
-        print("|cFF00FF00[QH]:|r Chat logging activated")
+        QH.LogInfo("Chat logging activated")
         return
     end
 
@@ -85,11 +85,11 @@ f:SetScript("OnEvent", function(_, event, ...)
     if event == "QUEST_ACCEPTED" then
         local questId = ...
         questId = questId or GetQuestID()
-        print("|cFF00FF00[QH]:|r Quest accepted " .. questId)
+        QH.LogInfo("Quest accepted " .. questId)
 
         local npcName = UnitName("npc") or UnitName("target")
         if npcName then
-            print("|cFF00FF00[QH]:|r Quest: " .. questId .. " Npc: " .. npcName)
+            QH.LogInfo("Quest: " .. questId .. " Npc: " .. npcName)
             QuestHistoryNpcDB[questId] = npcName
         end
         return
