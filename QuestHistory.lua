@@ -14,10 +14,13 @@ local category = Settings.RegisterVerticalLayoutCategory("Quest History")
 do
 	local name = "Enable backup to chat log"
 	local variable = "QuestHistory_EnableLogBackup"
-	local defaultValue = false
+	local defaultValue = true
 
 	local function GetValue()
-    	return QuestHistorySettingsDB.enableLogBackup or defaultValue
+        if QuestHistorySettingsDB.enableLogBackup == nil then
+           return defaultValue
+        end
+        return QuestHistorySettingsDB.enableLogBackup
     end
 
     local function SetValue(value)
@@ -32,6 +35,28 @@ do
     setting:SetValueChangedCallback(OnSettingChanged)
 
 	local tooltip = "Backup info about completed quests to chat log. If switched off, you can lose your data if game crashes"
+	Settings.CreateCheckbox(category, setting, tooltip)
+end
+
+do
+	local name = "Save quest duplicates"
+	local variable = "QuestHistory_SaveDuplicates"
+	local defaultValue = false
+
+	local function GetValue()
+        if QuestHistorySettingsDB.saveDuplicates == nil then
+            return defaultValue
+        end
+        return QuestHistorySettingsDB.saveDuplicates
+    end
+
+    local function SetValue(value)
+    	QuestHistorySettingsDB.saveDuplicates = value
+    end
+
+    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+	local tooltip = "Save or not quests to history that were already completed"
 	Settings.CreateCheckbox(category, setting, tooltip)
 end
 
@@ -52,15 +77,22 @@ function QH.SaveQuest(questId)
 
     local entry = zone .. "; " .. giver .. "; " .. title .. "; " .. questId
 
-    -- duplicate check (still simple)
-    for _, v in ipairs(QuestHistoryDB) do
-        if v == entry then
-            QH.LogError(entry .. " has been already saved")
-            return
+    local saveDuplicates = QuestHistorySettingsDB.saveDuplicates
+    if saveDuplicates == false then
+        -- duplicate check (still simple)
+        for _, v in ipairs(QuestHistoryDB) do
+            if v == entry then
+                QH.LogError(entry .. " has been already saved")
+                return
+            end
         end
     end
 
-    SendChatMessage("[QH] " .. entry, "WHISPER", nil, UnitName("player"))
+    local enableLogBackup = QuestHistorySettingsDB.enableLogBackup
+    if enableLogBackup == true then
+        SendChatMessage("[QH] " .. entry, "WHISPER", nil, UnitName("player"))
+    end
+
     table.insert(QuestHistoryDB, entry)
     QH.LogInfo("Saved " .. entry)
 end
