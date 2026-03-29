@@ -5,8 +5,6 @@ if not QH then QH = {} end
 if not QuestHistoryDB then QuestHistoryDB = {} end
 if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
 
-local f = CreateFrame("Frame")
-
 -- =========================
 -- Save quest to database and chat log
 -- =========================
@@ -18,7 +16,7 @@ function QH.SaveQuest(questId)
 
     local title = C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title"
     local zone = GetZoneText() or "Unknown Zone"
-    local giver = QuestHistoryNpcDB[questId] or UnitName("npc") or UnitName("target") or "Unknown NPC"
+    local giver = QuestHistoryNpcDB[questId] or UnitName("target") or "Unknown NPC"
 
     local entry = zone .. "; " .. giver .. "; " .. title .. "; " .. questId
 
@@ -54,20 +52,15 @@ end
 -- =========================
 -- Events
 -- =========================
-f:RegisterEvent("PLAYER_LOGIN")
-f:RegisterEvent("QUEST_TURNED_IN")
-f:RegisterEvent("QUEST_ACCEPTED")
+local frame = CreateFrame("Frame")
+local lastQuestGiver = nil
 
-f:SetScript("OnEvent", function(_, event, ...)
-    -- =========================
-    -- Auto enable chat log for backup in case game crashes
-    -- =========================
-    if event == "PLAYER_LOGIN" then
-        LoggingChat(true)
-        QH.LogInfo("Chat logging activated")
-        return
-    end
+frame:RegisterEvent("PLAYER_LOGIN")
+frame:RegisterEvent("QUEST_TURNED_IN")
+frame:RegisterEvent("QUEST_ACCEPTED")
+frame:RegisterEvent("QUEST_DETAIL")
 
+frame:SetScript("OnEvent", function(_, event, ...)
     -- =========================
     -- Save completed quest
     -- =========================
@@ -78,20 +71,34 @@ f:SetScript("OnEvent", function(_, event, ...)
         return
     end
 
-
     -- =========================
     -- Save quest givers
     -- =========================
+    if event == "QUEST_DETAIL" then
+        lastQuestGiver = UnitName("target")
+        return
+    end
+
     if event == "QUEST_ACCEPTED" then
         local questId = ...
         questId = questId or GetQuestID()
         QH.LogInfo("Quest accepted " .. questId)
 
-        local npcName = UnitName("npc") or UnitName("target")
+        local npcName = lastQuestGiver or UnitName("target")
+        lastQuestGiver = nil
         if npcName then
             QH.LogInfo("Quest: " .. questId .. " Npc: " .. npcName)
             QuestHistoryNpcDB[questId] = npcName
         end
+        return
+    end
+
+    -- =========================
+    -- Auto enable chat log for backup in case game crashes
+    -- =========================
+    if event == "PLAYER_LOGIN" then
+        LoggingChat(true)
+        QH.LogInfo("Chat logging activated")
         return
     end
 end)
