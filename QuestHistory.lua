@@ -96,18 +96,19 @@ function QH.SaveQuest(questId)
         return
     end
 
-    local title = QuestHistoryTitleDB[questId] or C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title"
-    local location = QuestHistoryLocationDB[questId] or GetZoneText() or "Unknown Zone"
-    local giver = QuestHistoryNpcDB[questId] or UnitName("target") or "Unknown NPC"
-
-    local entry = location .. "; " .. giver .. "; " .. title .. "; " .. questId
+    local entry = {
+        questId = questId,
+        title = QuestHistoryTitleDB[questId] or C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title",
+        location = QuestHistoryLocationDB[questId] or GetZoneText() or "Unknown Zone",
+        giver = QuestHistoryNpcDB[questId] or UnitName("target") or "Unknown NPC",
+        date = date("%d-%m-%Y %H:%M:%S"),
+    }
 
     local saveDuplicates = QuestHistorySettingsDB.saveDuplicates
     if saveDuplicates == false then
-        -- duplicate check (still simple)
         for _, v in ipairs(QuestHistoryDB) do
-            if v == entry then
-                QH.LogError(entry .. " has been already saved")
+            if v.questId == questId then
+                QH.LogError("Quest " .. questId .. " has been already saved")
                 return
             end
         end
