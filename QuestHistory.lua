@@ -6,7 +6,7 @@ local completedQuests = 0
 -- Settings
 -- =========================
 local function InitializeSettings()
-    local category = Settings.RegisterVerticalLayoutCategory("Quest History")
+    local category, layout = Settings.RegisterVerticalLayoutCategory("Quest History")
 
     do
     	local name = "Enable backup to chat log"
@@ -156,6 +156,23 @@ local function InitializeSettings()
     	Settings.CreateCheckbox(category, setting, tooltip)
     end
 
+    do
+        local exportButton = CreateSettingsButtonInitializer(
+                "Export Data",
+                "Export",
+                function()
+                    local data = QH.ExportData()
+                    QH.ShowExportPopup(data)
+                end,
+                "Export your quest history",
+                true,
+                nil,
+                nil
+        )
+
+        layout:AddInitializer(exportButton)
+    end
+
     Settings.RegisterAddOnCategory(category)
 end
 
@@ -253,6 +270,102 @@ function QH.ReloadChatLogging(value)
     else
         QH.LogInfo("Chat logging deactivated")
     end
+end
+
+-- =========================
+-- Export history
+-- =========================
+function QH.ExportData()
+    if not QuestHistoryDB or #QuestHistoryDB == 0 then
+        return "No data"
+    end
+
+    local result = {}
+
+    for _, v in ipairs(QuestHistoryDB) do
+        local line = string.format(
+            "%d | %s | %s | %s | %s",
+            v.questId or 0,
+            v.title or "Unknown",
+            v.giver or "Unknown",
+            v.location or "Unknown",
+            v.date or "Unknown"
+        )
+        table.insert(result, line)
+    end
+
+    return table.concat(result, "\n")
+end
+
+-- =========================
+-- Export Popup
+-- =========================
+function QH.ShowExportPopup(text)
+    if not QH.ExportFrame then
+        local exportFrame = CreateFrame("Frame", "QH_ExportFrame", UIParent, "BackdropTemplate")
+        exportFrame:SetSize(650, 450)
+        exportFrame:SetPoint("CENTER")
+        exportFrame:SetFrameStrata("DIALOG")
+
+        exportFrame:SetBackdrop({
+            bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 16,
+        })
+        exportFrame:SetBackdropColor(0, 0, 0, 0.9)
+
+        local title = exportFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        title:SetPoint("TOP", 0, -10)
+        title:SetText("Quest History Export")
+
+        local closeButton = CreateFrame("Button", nil, exportFrame, "UIPanelCloseButton")
+        closeButton:SetPoint("TOPRIGHT", 0, 0)
+        closeButton:SetScript("OnClick", function()
+            exportFrame:Hide()
+        end)
+
+        local scrollFrame = CreateFrame("ScrollFrame", nil, exportFrame, "UIPanelScrollFrameTemplate")
+        scrollFrame:SetPoint("TOPLEFT", 15, -40)
+        scrollFrame:SetPoint("BOTTOMRIGHT", -35, 15)
+
+        local editBox = CreateFrame("EditBox", nil, scrollFrame)
+        editBox:SetMultiLine(true)
+        editBox:SetFontObject(ChatFontNormal)
+        editBox:SetWidth(580)
+        editBox:SetAutoFocus(false)
+        editBox:SetMaxLetters(9999999)
+
+        editBox:SetScript("OnEscapePressed", function(self)
+            self:ClearFocus()
+            exportFrame:Hide()
+        end)
+
+        exportFrame:SetScript("OnHide", function()
+            editBox:SetText("")
+        end)
+
+        editBox:SetScript("OnEditFocusGained", function(self)
+            self:HighlightText()
+        end)
+
+        scrollFrame:SetScrollChild(editBox)
+
+        exportFrame.ScrollFrame = scrollFrame
+        exportFrame.EditBox = editBox
+        exportFrame.CloseButton = closeButton
+        exportFrame.Title = title
+
+        QH.ExportFrame = exportFrame
+    end
+
+    local exportFrame = QH.ExportFrame
+    local editBox = exportFrame.EditBox
+
+    editBox:SetText(text or "")
+    editBox:SetCursorPosition(0)
+
+    exportFrame:Show()
+    editBox:SetFocus()
 end
 
 -- =========================
