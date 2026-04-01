@@ -43,25 +43,25 @@ do
 end
 
 do
-	local name = "Save quest duplicates"
-	local variable = "QuestHistory_SaveDuplicates"
-	local defaultValue = false
+	local name = "Save repeatable quests"
+	local variable = "QuestHistory_SaveRepeatable"
+	local defaultValue = true
 
-    if QuestHistorySettingsDB.saveDuplicates == nil then
-        QuestHistorySettingsDB.saveDuplicates = defaultValue
+    if QuestHistorySettingsDB.saveRepeatable == nil then
+        QuestHistorySettingsDB.saveRepeatable = defaultValue
     end
 
 	local function GetValue()
-        return QuestHistorySettingsDB.saveDuplicates
+        return QuestHistorySettingsDB.saveRepeatable
     end
 
     local function SetValue(value)
-    	QuestHistorySettingsDB.saveDuplicates = value
+    	QuestHistorySettingsDB.saveRepeatable = value
     end
 
     local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
 
-	local tooltip = "Save or not quests to history that were already completed"
+	local tooltip = "Save or not repeatable quests to history"
 	Settings.CreateCheckbox(category, setting, tooltip)
 end
 
@@ -107,13 +107,12 @@ function QH.SaveQuest(questId)
         date = date("%d-%m-%Y %H:%M:%S"),
     }
 
-    local saveDuplicates = QuestHistorySettingsDB.saveDuplicates
-    if saveDuplicates == false then
-        for _, v in ipairs(QuestHistoryDB) do
-            if v.questId == questId then
-                QH.LogError("Quest " .. questId .. " has been already saved")
-                return
-            end
+    local saveRepeatable = QuestHistorySettingsDB.saveRepeatable
+    if saveRepeatable == false then
+        local isRepeatable = C_QuestLog.IsRepeatableQuest(questID)
+        if isRepeatable == true then
+            QH.LogError("Quest " .. questId .. " is repeatable. Skipping.")
+            return
         end
     end
 
