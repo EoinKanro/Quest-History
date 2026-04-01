@@ -83,25 +83,25 @@ local function InitializeSettings()
     end
 
     do
-    	local name = "Enable auto reload on warning"
-    	local variable = "QuestHistory_AutoReloadOnWarning"
+    	local name = "Show popup for reload on warning"
+    	local variable = "QuestHistory_ShowPopupOnWarning"
     	local defaultValue = false
 
-        if QuestHistorySettingsDB.autoReloadOnWarning == nil then
-            QuestHistorySettingsDB.autoReloadOnWarning = defaultValue
+        if QuestHistorySettingsDB.showPopupOnWarning == nil then
+            QuestHistorySettingsDB.showPopupOnWarning = defaultValue
         end
 
     	local function GetValue()
-            return QuestHistorySettingsDB.autoReloadOnWarning
+            return QuestHistorySettingsDB.showPopupOnWarning
         end
 
         local function SetValue(value)
-        	QuestHistorySettingsDB.autoReloadOnWarning = value
+        	QuestHistorySettingsDB.showPopupOnWarning = value
         end
 
         local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
 
-    	local tooltip = "Call /reload automatically when you hit the max amount of completed quests. Not recommended bcz you can skip a cutscene on quest completion"
+    	local tooltip = "Show popup when you hit max amount of completed quests. It will reload your interface on accept"
     	Settings.CreateCheckbox(category, setting, tooltip)
     end
 
@@ -160,6 +160,21 @@ local function InitializeSettings()
 end
 
 -- =========================
+-- Popup for reloading
+-- =========================
+StaticPopupDialogs["QH_RELOAD_CONFIRM"] = {
+	text = "You hit max amount of completed quests. Reload?",
+	button1 = "Yes",
+	button2 = "No",
+	OnAccept = function()
+       ReloadUI()
+ 	end,
+	timeout = 0,
+	whileDead = true,
+	hideOnEscape = true,
+}
+
+-- =========================
 -- Save quest to database and chat log
 -- =========================
 function QH.SaveQuest(questId)
@@ -196,9 +211,9 @@ function QH.SaveQuest(questId)
     completedQuests = completedQuests + 1
     local warningQuestsAmount = QuestHistorySettingsDB.warningQuestsAmount
     if completedQuests >= warningQuestsAmount then
-        local autoReloadOnWarning = QuestHistorySettingsDB.autoReloadOnWarning
-        if autoReloadOnWarning == true then
-            C_UI.Reload()
+        local showPopupOnWarning = QuestHistorySettingsDB.showPopupOnWarning
+        if showPopupOnWarning == true then
+            StaticPopup_Show("QH_RELOAD_CONFIRM")
         else
             QH.LogError("Send /reload to chat to save your progress")
         end
