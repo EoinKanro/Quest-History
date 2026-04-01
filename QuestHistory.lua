@@ -158,16 +158,31 @@ local function InitializeSettings()
 
     do
         local exportButton = CreateSettingsButtonInitializer(
-                "Export Data",
-                "Export",
-                function()
-                    local data = QH.ExportData()
-                    QH.ShowExportPopup(data)
-                end,
-                "Export your quest history",
-                true,
-                nil,
-                nil
+            "Export Data",
+            "Export",
+            function()
+                local years = QH.GetDates()
+                local buttons = {}
+
+                for _, v in ipairs(years) do
+                    local buttonData = {
+                        text = v,
+                        callback = function()
+                             QH.ExportMenuFrame:Hide()
+                             local data = QH.ExportData(v)
+                             QH.ShowExportPopup(data)
+                        end
+                    }
+
+                    table.insert(buttons, buttonData)
+                end
+
+                QH.ShowExportMenuPopup(buttons)
+            end,
+            "Export your quest history",
+            true,
+            nil,
+            nil
         )
 
         layout:AddInitializer(exportButton)
@@ -179,7 +194,7 @@ end
 -- =========================
 -- Popup for reloading
 -- =========================
-StaticPopupDialogs["QH_RELOAD_CONFIRM"] = {
+StaticPopupDialogs["QuestHistory_ReloadConfirmPopup"] = {
 	text = "You hit max amount of completed quests. Reload?",
 	button1 = "Yes",
 	button2 = "No",
@@ -245,7 +260,7 @@ function QH.SaveQuest(questId)
     if completedQuests >= warningQuestsAmount then
         local showPopupOnWarning = QuestHistorySettingsDB.showPopupOnWarning
         if showPopupOnWarning == true then
-            StaticPopup_Show("QH_RELOAD_CONFIRM")
+            StaticPopup_Show("QuestHistory_ReloadConfirmPopup")
         else
             QH.LogError("Send /reload to chat to save your progress")
         end
@@ -288,9 +303,25 @@ function QH.ReloadChatLogging(value)
 end
 
 -- =========================
+-- Export dates backwords
+-- =========================
+function QH.GetDates()
+    if not QuestHistoryDateDB or #QuestHistoryDateDB == 0 then
+        return {}
+    end
+
+    local result = {}
+    for i = #QuestHistoryDateDB, 1, -1 do
+        local entry = QuestHistoryDateDB[i]
+        table.insert(result, entry)
+    end
+    return result
+end
+
+-- =========================
 -- Export history
 -- =========================
-function QH.ExportData()
+function QH.ExportData(date)
     if not QuestHistoryDB or #QuestHistoryDB == 0 then
         return "No data"
     end
@@ -298,29 +329,119 @@ function QH.ExportData()
     local result = {}
 
     for _, v in ipairs(QuestHistoryDB) do
-        local line = string.format(
-            "%d | %s | %s | %s | %s",
-            v.questId or 0,
-            v.title or "Unknown",
-            v.giver or "Unknown",
-            v.location or "Unknown",
-            v.date or "Unknown"
-        )
-        table.insert(result, line)
+        local entryDate = v.date
+        if date == entryDate then
+            local line = string.format(
+                "%d | %s | %s | %s | %s",
+                        v.questId or 0,
+                        v.title or "Unknown",
+                        v.giver or "Unknown",
+                        v.location or "Unknown",
+                        v.date or "Unknown"
+                    )
+            table.insert(result, line)
+        end
     end
 
     return table.concat(result, "\n")
 end
 
 -- =========================
--- Export Popup
+-- Export menu popup with buttons
+-- =========================
+function QH.ShowExportMenuPopup(buttonData)
+    if not QH.ExportMenuFrame then
+        local exportMenuFrame = CreateFrame("Frame", "QuestHistory_ExportMenuFrame", UIParent, "BackdropTemplate")
+        exportMenuFrame:SetSize(400, 500)
+        exportMenuFrame:SetPoint("CENTER")
+        exportMenuFrame:SetFrameStrata("DIALOG")
+
+        exportMenuFrame:EnableMouse(true)
+        exportMenuFrame:SetMovable(true)
+        exportMenuFrame:RegisterForDrag("LeftButton")
+        exportMenuFrame:SetScript("OnDragStart", exportMenuFrame.StartMoving)
+        exportMenuFrame:SetScript("OnDragStop", exportMenuFrame.StopMovingOrSizing)
+
+        exportMenuFrame:SetBackdrop({
+            bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+            edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+            tile = true, tileSize = 16, edgeSize = 16,
+        })
+        exportMenuFrame:SetBackdropColor(0, 0, 0, 0.9)
+
+        local title = exportMenuFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+        title:SetPoint("TOP", 0, -10)
+        title:SetText("Quest History Export")
+
+        local closeButton = CreateFrame("Button", nil, exportMenuFrame, "UIPanelCloseButton")
+        closeButton:SetPoint("TOPRIGHT", 0, 0)
+        closeButton:SetScript("OnClick", function()
+            exportMenuFrame:Hide()
+        end)
+
+        local scrollFrame = CreateFrame("ScrollFrame", nil, exportMenuFrame, "UIPanelScrollFrameTemplate")
+        scrollFrame:SetPoint("TOPLEFT", 15, -40)
+        scrollFrame:SetPoint("BOTTOMRIGHT", -35, 15)
+
+        local scrollChild = CreateFrame("Frame", nil, scrollFrame)
+        scrollChild:SetSize(1, 1)
+        scrollFrame:SetScrollChild(scrollChild)
+
+        exportMenuFrame:SetScript("OnHide", function()
+            for _, button in ipairs(exportMenuFrame.Buttons) do
+                button:Hide()
+                button:SetParent(nil)
+            end
+            exportMenuFrame.Buttons = {}
+        end)
+
+        exportMenuFrame.ScrollFrame = scrollFrame
+        exportMenuFrame.ScrollChild = scrollChild
+        exportMenuFrame.CloseButton = closeButton
+        exportMenuFrame.Title = title
+        exportMenuFrame.Buttons = {}
+
+        QH.ExportMenuFrame = exportMenuFrame
+    end
+
+    local exportMenuFrame = QH.ExportMenuFrame
+    local scrollChild = exportMenuFrame.ScrollChild
+
+    local padding = 7
+    local buttonHeight = 25
+    local yOffset = -padding
+    for i, data in ipairs(buttonData) do
+        local button = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+        button:SetSize(300, buttonHeight)
+        button:SetPoint("TOPLEFT", 27, yOffset)
+        button:SetText(data.text or "Unknown")
+        button:SetScript("OnClick", function()
+            data.callback()
+        end)
+
+        yOffset = yOffset - buttonHeight - padding
+        table.insert(exportMenuFrame.Buttons, button)
+    end
+
+    scrollChild:SetHeight(-yOffset + padding)
+    exportMenuFrame:Show()
+end
+
+-- =========================
+-- Export popup with actual data
 -- =========================
 function QH.ShowExportPopup(text)
     if not QH.ExportFrame then
-        local exportFrame = CreateFrame("Frame", "QH_ExportFrame", UIParent, "BackdropTemplate")
-        exportFrame:SetSize(650, 450)
+        local exportFrame = CreateFrame("Frame", "QuestHistory_ExportFrame", UIParent, "BackdropTemplate")
+        exportFrame:SetSize(650, 500)
         exportFrame:SetPoint("CENTER")
         exportFrame:SetFrameStrata("DIALOG")
+
+        exportFrame:EnableMouse(true)
+        exportFrame:SetMovable(true)
+        exportFrame:RegisterForDrag("LeftButton")
+        exportFrame:SetScript("OnDragStart", exportFrame.StartMoving)
+        exportFrame:SetScript("OnDragStop", exportFrame.StopMovingOrSizing)
 
         exportFrame:SetBackdrop({
             bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -350,6 +471,12 @@ function QH.ShowExportPopup(text)
         editBox:SetAutoFocus(false)
         editBox:SetMaxLetters(9999999)
 
+        scrollFrame:SetScrollChild(editBox)
+
+        editBox:SetScript("OnEditFocusGained", function(self)
+            self:HighlightText()
+        end)
+
         editBox:SetScript("OnEscapePressed", function(self)
             self:ClearFocus()
             exportFrame:Hide()
@@ -358,12 +485,6 @@ function QH.ShowExportPopup(text)
         exportFrame:SetScript("OnHide", function()
             editBox:SetText("")
         end)
-
-        editBox:SetScript("OnEditFocusGained", function(self)
-            self:HighlightText()
-        end)
-
-        scrollFrame:SetScrollChild(editBox)
 
         exportFrame.ScrollFrame = scrollFrame
         exportFrame.EditBox = editBox
