@@ -9,6 +9,8 @@ if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
 if not QuestHistoryLocationDB then QuestHistoryLocationDB = {} end
 if not QuestHistoryTitleDB then QuestHistoryTitleDB = {} end
 
+local completedQuests = 0
+
 -- =========================
 -- Settings
 -- =========================
@@ -63,6 +65,80 @@ do
 
 	local tooltip = "Save or not repeatable quests to history"
 	Settings.CreateCheckbox(category, setting, tooltip)
+end
+
+do
+	local name = "Enable backup warning"
+	local variable = "QuestHistory_EnableBackupWarning"
+	local defaultValue = true
+
+    if QuestHistorySettingsDB.enableBackupWarning == nil then
+        QuestHistorySettingsDB.enableBackupWarning = defaultValue
+    end
+
+	local function GetValue()
+        return QuestHistorySettingsDB.enableBackupWarning
+    end
+
+    local function SetValue(value)
+    	QuestHistorySettingsDB.enableBackupWarning = value
+    end
+
+    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+	local tooltip = "Warn to do /reload if you completed a lot of quests. It's important bcz if your game crashes then all your data from the session will be lost. WoW saves data to disk only on reload or exit."
+	Settings.CreateCheckbox(category, setting, tooltip)
+end
+
+do
+	local name = "Enable auto reload on warning"
+	local variable = "QuestHistory_AutoReloadOnWarning"
+	local defaultValue = false
+
+    if QuestHistorySettingsDB.autoReloadOnWarning == nil then
+        QuestHistorySettingsDB.autoReloadOnWarning = defaultValue
+    end
+
+	local function GetValue()
+        return QuestHistorySettingsDB.autoReloadOnWarning
+    end
+
+    local function SetValue(value)
+    	QuestHistorySettingsDB.autoReloadOnWarning = value
+    end
+
+    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+	local tooltip = "Call /reload automatically when you hit the max amount of completed quests. Not recommended bcz you can skip a cutscene on quest completion"
+	Settings.CreateCheckbox(category, setting, tooltip)
+end
+
+do
+	local name = "Warning quests amount"
+	local variable = "QuestHistory_WarningQuestsAmount"
+	local defaultValue = 10
+	local minValue = 1
+	local maxValue = 100
+	local step = 1
+
+	if QuestHistorySettingsDB.warningQuestsAmount == nil then
+        QuestHistorySettingsDB.warningQuestsAmount = defaultValue
+    end
+
+	local function GetValue()
+		return QuestHistorySettingsDB.warningQuestsAmount
+	end
+
+	local function SetValue(value)
+		QuestHistorySettingsDB.warningQuestsAmount = value
+	end
+
+	local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+	local tooltip = "Amount of quests you need to complete to get a warning"
+	local options = Settings.CreateSliderOptions(minValue, maxValue, step)
+	options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
+	Settings.CreateSlider(category, setting, options, tooltip)
 end
 
 do
@@ -123,6 +199,17 @@ function QH.SaveQuest(questId)
 
     table.insert(QuestHistoryDB, entry)
     QH.LogInfo("Saved " .. questId)
+
+    completedQuests = completedQuests + 1
+    local warningQuestsAmount = QuestHistorySettingsDB.warningQuestsAmount
+    if completedQuests >= warningQuestsAmount then
+        local autoReloadOnWarning = QuestHistorySettingsDB.autoReloadOnWarning
+        if autoReloadOnWarning == true then
+            C_UI.Reload()
+        else
+            QH.LogError("Send /reload to chat to save your progress")
+        end
+    end
 end
 
 -- =========================
