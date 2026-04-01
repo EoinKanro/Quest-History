@@ -1,170 +1,163 @@
--- =========================
--- Global Objects
--- =========================
 if not QH then QH = {} end
-if not QuestHistoryDB then QuestHistoryDB = {} end
-if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
-
-if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
-if not QuestHistoryLocationDB then QuestHistoryLocationDB = {} end
-if not QuestHistoryTitleDB then QuestHistoryTitleDB = {} end
 
 local completedQuests = 0
 
 -- =========================
 -- Settings
 -- =========================
-local category = Settings.RegisterVerticalLayoutCategory("Quest History")
+local function InitializeSettings()
+    local category = Settings.RegisterVerticalLayoutCategory("Quest History")
 
-do
-	local name = "Enable backup to chat log"
-	local variable = "QuestHistory_EnableLogBackup"
-	local defaultValue = true
+    do
+    	local name = "Enable backup to chat log"
+    	local variable = "QuestHistory_EnableLogBackup"
+    	local defaultValue = true
 
-	if QuestHistorySettingsDB.enableLogBackup == nil then
-        QuestHistorySettingsDB.enableLogBackup = defaultValue
+    	if QuestHistorySettingsDB.enableLogBackup == nil then
+            QuestHistorySettingsDB.enableLogBackup = defaultValue
+        end
+
+    	local function GetValue()
+            return QuestHistorySettingsDB.enableLogBackup
+        end
+
+        local function SetValue(value)
+        	QuestHistorySettingsDB.enableLogBackup = value
+        end
+
+        local function OnSettingChanged(_, value)
+    	    QH.ReloadChatLogging(value)
+        end
+
+        local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+        setting:SetValueChangedCallback(OnSettingChanged)
+
+    	local tooltip = "Backup info about completed quests to chat log. If switched off, you can lose your data if game crashes"
+    	Settings.CreateCheckbox(category, setting, tooltip)
     end
 
-	local function GetValue()
-        return QuestHistorySettingsDB.enableLogBackup
+    do
+    	local name = "Save repeatable quests"
+    	local variable = "QuestHistory_SaveRepeatable"
+    	local defaultValue = true
+
+        if QuestHistorySettingsDB.saveRepeatable == nil then
+            QuestHistorySettingsDB.saveRepeatable = defaultValue
+        end
+
+    	local function GetValue()
+            return QuestHistorySettingsDB.saveRepeatable
+        end
+
+        local function SetValue(value)
+        	QuestHistorySettingsDB.saveRepeatable = value
+        end
+
+        local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+    	local tooltip = "Save or not repeatable quests to history"
+    	Settings.CreateCheckbox(category, setting, tooltip)
     end
 
-    local function SetValue(value)
-    	QuestHistorySettingsDB.enableLogBackup = value
+    do
+    	local name = "Enable backup warning"
+    	local variable = "QuestHistory_EnableBackupWarning"
+    	local defaultValue = true
+
+        if QuestHistorySettingsDB.enableBackupWarning == nil then
+            QuestHistorySettingsDB.enableBackupWarning = defaultValue
+        end
+
+    	local function GetValue()
+            return QuestHistorySettingsDB.enableBackupWarning
+        end
+
+        local function SetValue(value)
+        	QuestHistorySettingsDB.enableBackupWarning = value
+        end
+
+        local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+    	local tooltip = "Warn to do /reload if you completed a lot of quests. It's important bcz if your game crashes then all your data from the session will be lost. WoW saves data to disk only on reload or exit."
+    	Settings.CreateCheckbox(category, setting, tooltip)
     end
 
-    local function OnSettingChanged(_, value)
-	    QH.ReloadChatLogging(value)
+    do
+    	local name = "Enable auto reload on warning"
+    	local variable = "QuestHistory_AutoReloadOnWarning"
+    	local defaultValue = false
+
+        if QuestHistorySettingsDB.autoReloadOnWarning == nil then
+            QuestHistorySettingsDB.autoReloadOnWarning = defaultValue
+        end
+
+    	local function GetValue()
+            return QuestHistorySettingsDB.autoReloadOnWarning
+        end
+
+        local function SetValue(value)
+        	QuestHistorySettingsDB.autoReloadOnWarning = value
+        end
+
+        local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+    	local tooltip = "Call /reload automatically when you hit the max amount of completed quests. Not recommended bcz you can skip a cutscene on quest completion"
+    	Settings.CreateCheckbox(category, setting, tooltip)
     end
 
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
-    setting:SetValueChangedCallback(OnSettingChanged)
+    do
+    	local name = "Warning quests amount"
+    	local variable = "QuestHistory_WarningQuestsAmount"
+    	local defaultValue = 10
+    	local minValue = 1
+    	local maxValue = 100
+    	local step = 1
 
-	local tooltip = "Backup info about completed quests to chat log. If switched off, you can lose your data if game crashes"
-	Settings.CreateCheckbox(category, setting, tooltip)
+    	if QuestHistorySettingsDB.warningQuestsAmount == nil then
+            QuestHistorySettingsDB.warningQuestsAmount = defaultValue
+        end
+
+    	local function GetValue()
+    		return QuestHistorySettingsDB.warningQuestsAmount
+    	end
+
+    	local function SetValue(value)
+    		QuestHistorySettingsDB.warningQuestsAmount = value
+    	end
+
+    	local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+    	local tooltip = "Amount of quests you need to complete to get a warning"
+    	local options = Settings.CreateSliderOptions(minValue, maxValue, step)
+    	options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
+    	Settings.CreateSlider(category, setting, options, tooltip)
+    end
+
+    do
+    	local name = "Enable debug logging"
+    	local variable = "QuestHistory_EnableDebugLogging"
+    	local defaultValue = false
+
+    	if QuestHistorySettingsDB.enableDebugLogging == nil then
+            QuestHistorySettingsDB.enableDebugLogging = defaultValue
+        end
+
+    	local function GetValue()
+            return QuestHistorySettingsDB.enableDebugLogging
+        end
+
+        local function SetValue(value)
+        	QuestHistorySettingsDB.enableDebugLogging = value
+        end
+
+        local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
+
+    	local tooltip = "Log additional info to chat"
+    	Settings.CreateCheckbox(category, setting, tooltip)
+    end
+
+    Settings.RegisterAddOnCategory(category)
 end
-
-do
-	local name = "Save repeatable quests"
-	local variable = "QuestHistory_SaveRepeatable"
-	local defaultValue = true
-
-    if QuestHistorySettingsDB.saveRepeatable == nil then
-        QuestHistorySettingsDB.saveRepeatable = defaultValue
-    end
-
-	local function GetValue()
-        return QuestHistorySettingsDB.saveRepeatable
-    end
-
-    local function SetValue(value)
-    	QuestHistorySettingsDB.saveRepeatable = value
-    end
-
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
-
-	local tooltip = "Save or not repeatable quests to history"
-	Settings.CreateCheckbox(category, setting, tooltip)
-end
-
-do
-	local name = "Enable backup warning"
-	local variable = "QuestHistory_EnableBackupWarning"
-	local defaultValue = true
-
-    if QuestHistorySettingsDB.enableBackupWarning == nil then
-        QuestHistorySettingsDB.enableBackupWarning = defaultValue
-    end
-
-	local function GetValue()
-        return QuestHistorySettingsDB.enableBackupWarning
-    end
-
-    local function SetValue(value)
-    	QuestHistorySettingsDB.enableBackupWarning = value
-    end
-
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
-
-	local tooltip = "Warn to do /reload if you completed a lot of quests. It's important bcz if your game crashes then all your data from the session will be lost. WoW saves data to disk only on reload or exit."
-	Settings.CreateCheckbox(category, setting, tooltip)
-end
-
-do
-	local name = "Enable auto reload on warning"
-	local variable = "QuestHistory_AutoReloadOnWarning"
-	local defaultValue = false
-
-    if QuestHistorySettingsDB.autoReloadOnWarning == nil then
-        QuestHistorySettingsDB.autoReloadOnWarning = defaultValue
-    end
-
-	local function GetValue()
-        return QuestHistorySettingsDB.autoReloadOnWarning
-    end
-
-    local function SetValue(value)
-    	QuestHistorySettingsDB.autoReloadOnWarning = value
-    end
-
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
-
-	local tooltip = "Call /reload automatically when you hit the max amount of completed quests. Not recommended bcz you can skip a cutscene on quest completion"
-	Settings.CreateCheckbox(category, setting, tooltip)
-end
-
-do
-	local name = "Warning quests amount"
-	local variable = "QuestHistory_WarningQuestsAmount"
-	local defaultValue = 10
-	local minValue = 1
-	local maxValue = 100
-	local step = 1
-
-	if QuestHistorySettingsDB.warningQuestsAmount == nil then
-        QuestHistorySettingsDB.warningQuestsAmount = defaultValue
-    end
-
-	local function GetValue()
-		return QuestHistorySettingsDB.warningQuestsAmount
-	end
-
-	local function SetValue(value)
-		QuestHistorySettingsDB.warningQuestsAmount = value
-	end
-
-	local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
-
-	local tooltip = "Amount of quests you need to complete to get a warning"
-	local options = Settings.CreateSliderOptions(minValue, maxValue, step)
-	options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
-	Settings.CreateSlider(category, setting, options, tooltip)
-end
-
-do
-	local name = "Enable debug logging"
-	local variable = "QuestHistory_EnableDebugLogging"
-	local defaultValue = false
-
-	if QuestHistorySettingsDB.enableDebugLogging == nil then
-        QuestHistorySettingsDB.enableDebugLogging = defaultValue
-    end
-
-	local function GetValue()
-        return QuestHistorySettingsDB.enableDebugLogging
-    end
-
-    local function SetValue(value)
-    	QuestHistorySettingsDB.enableDebugLogging = value
-    end
-
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue, SetValue)
-
-	local tooltip = "Log additional info to chat"
-	Settings.CreateCheckbox(category, setting, tooltip)
-end
-
-Settings.RegisterAddOnCategory(category)
 
 -- =========================
 -- Save quest to database and chat log
@@ -253,12 +246,13 @@ end
 local frame = CreateFrame("Frame")
 local lastQuestGiver = nil
 
+frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("QUEST_TURNED_IN")
 frame:RegisterEvent("QUEST_ACCEPTED")
 frame:RegisterEvent("QUEST_DETAIL")
 
-frame:SetScript("OnEvent", function(_, event, ...)
+frame:SetScript("OnEvent", function(self, event, ...)
     -- =========================
     -- Save completed quest
     -- =========================
@@ -305,10 +299,32 @@ frame:SetScript("OnEvent", function(_, event, ...)
     end
 
     -- =========================
+    -- Init databases and settings
+    -- =========================
+    if event == "ADDON_LOADED" then
+        local addonName = ...
+        if addonName == "QuestHistory" then
+            if not QuestHistoryDB then QuestHistoryDB = {} end
+            if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
+
+            if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
+            if not QuestHistoryLocationDB then QuestHistoryLocationDB = {} end
+            if not QuestHistoryTitleDB then QuestHistoryTitleDB = {} end
+
+            InitializeSettings()
+            QH.ReloadChatLogging()
+
+            self:UnregisterEvent("ADDON_LOADED")
+        end
+        return
+    end
+
+    -- =========================
     -- Auto enable chat log for backup in case game crashes
     -- =========================
     if event == "PLAYER_LOGIN" then
         QH.ReloadChatLogging()
+        self:UnregisterEvent("PLAYER_LOGIN")
         return
     end
 end)
