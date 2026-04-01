@@ -332,18 +332,18 @@ function QH.ExportData(date)
         local entryDate = v.date
         if date == entryDate then
             local line = string.format(
-                "%d | %s | %s | %s | %s",
-                        v.questId or 0,
-                        v.title or "Unknown",
-                        v.giver or "Unknown",
-                        v.location or "Unknown",
-                        v.date or "Unknown"
-                    )
+                "{\"questId\":%d,\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"date\":\"%s\"}",
+                v.questId or 0,
+                v.title or "Unknown Title",
+                v.giver or "Unknown NPC",
+                v.location or "Unknown Location",
+                v.date or "Unknown Date"
+            )
             table.insert(result, line)
         end
     end
 
-    return table.concat(result, "\n")
+    return "[" .. table.concat(result, ",\n") .. "]"
 end
 
 -- =========================
