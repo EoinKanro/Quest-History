@@ -200,12 +200,13 @@ function QH.SaveQuest(questId)
         return
     end
 
+    local currentDate = date("%d.%m.%Y")
     local entry = {
         questId = questId,
         title = QuestHistoryTitleDB[questId] or C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title",
         location = QuestHistoryLocationDB[questId] or GetZoneText() or "Unknown Zone",
         giver = QuestHistoryNpcDB[questId] or UnitName("target") or "Unknown NPC",
-        date = date("%d-%m-%Y %H:%M:%S"),
+        date = currentDate,
     }
 
     local saveRepeatable = QuestHistorySettingsDB.saveRepeatable
@@ -222,10 +223,24 @@ function QH.SaveQuest(questId)
         SendChatMessage("[QH] " .. questId, "WHISPER", nil, UnitName("player"))
     end
 
+    -- Save quest
     table.insert(QuestHistoryDB, entry)
+
+    -- Save date
+    local lastDate = QuestHistoryDateDB[#QuestHistoryDateDB]
+    if lastDate ~= currentDate then
+        table.insert(QuestHistoryDateDB, currentDate)
+    end
+
     QH.LogInfo("Saved " .. questId)
 
+    -- Show warning
     completedQuests = completedQuests + 1
+    local enableBackupWarning = QuestHistorySettingsDB.enableBackupWarning
+    if enableBackupWarning ~= true then
+        return
+    end
+
     local warningQuestsAmount = QuestHistorySettingsDB.warningQuestsAmount
     if completedQuests >= warningQuestsAmount then
         local showPopupOnWarning = QuestHistorySettingsDB.showPopupOnWarning
@@ -434,6 +449,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         if addonName == "QuestHistory" then
             if not QuestHistoryDB then QuestHistoryDB = {} end
             if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
+            if not QuestHistoryDateDB then QuestHistoryDateDB = {} end
 
             if not QuestHistoryNpcDB then QuestHistoryNpcDB = {} end
             if not QuestHistoryLocationDB then QuestHistoryLocationDB = {} end

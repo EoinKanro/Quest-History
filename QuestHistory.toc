@@ -3,7 +3,7 @@
 ## Title: Quest History
 ## Author: EoinKanro
 ## SavedVariables: QuestHistoryNpcDB, QuestHistoryLocationDB, QuestHistoryTitleDB
-## SavedVariablesPerCharacter: QuestHistoryDB, QuestHistorySettingsDB
+## SavedVariablesPerCharacter: QuestHistoryDB, QuestHistoryDateDB, QuestHistorySettingsDB
 
 QuestHistoryUtils.lua
 QuestHistory.lua
