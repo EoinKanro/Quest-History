@@ -19,10 +19,11 @@ do
 	local variable = "QuestHistory_EnableLogBackup"
 	local defaultValue = true
 
+	if QuestHistorySettingsDB.enableLogBackup == nil then
+        QuestHistorySettingsDB.enableLogBackup = defaultValue
+    end
+
 	local function GetValue()
-        if QuestHistorySettingsDB.enableLogBackup == nil then
-           return defaultValue
-        end
         return QuestHistorySettingsDB.enableLogBackup
     end
 
@@ -46,10 +47,11 @@ do
 	local variable = "QuestHistory_SaveDuplicates"
 	local defaultValue = false
 
+    if QuestHistorySettingsDB.saveDuplicates == nil then
+        QuestHistorySettingsDB.saveDuplicates = defaultValue
+    end
+
 	local function GetValue()
-        if QuestHistorySettingsDB.saveDuplicates == nil then
-            return defaultValue
-        end
         return QuestHistorySettingsDB.saveDuplicates
     end
 
@@ -68,10 +70,11 @@ do
 	local variable = "QuestHistory_EnableDebugLogging"
 	local defaultValue = false
 
+	if QuestHistorySettingsDB.enableDebugLogging == nil then
+        QuestHistorySettingsDB.enableDebugLogging = defaultValue
+    end
+
 	local function GetValue()
-        if QuestHistorySettingsDB.enableDebugLogging == nil then
-            return defaultValue
-        end
         return QuestHistorySettingsDB.enableDebugLogging
     end
 
