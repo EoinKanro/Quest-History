@@ -215,13 +215,17 @@ function QH.SaveQuest(questId)
         return
     end
 
-    local currentDate = date("%d.%m.%Y")
+    local currentDateTime = date("%d.%m.%Y %H:%M:%S")
+    local currentDate = currentDateTime:sub(1, 10)
+    local currentTime = currentDateTime:sub(12, 20)
+
     local entry = {
         questId = questId,
         title = QuestHistoryTitleDB[questId] or C_QuestLog.GetTitleForQuestID(questId) or "Unknown Title",
         location = QuestHistoryLocationDB[questId] or GetZoneText() or "Unknown Zone",
         giver = QuestHistoryNpcDB[questId] or UnitName("target") or "Unknown NPC",
         date = currentDate,
+        time = currentTime,
     }
 
     local saveRepeatable = QuestHistorySettingsDB.saveRepeatable
@@ -332,12 +336,13 @@ function QH.ExportData(date)
         local entryDate = v.date
         if date == entryDate then
             local line = string.format(
-                "{\"questId\":%d,\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"date\":\"%s\"}",
+                "{\"questId\":%d,\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"date\":\"%s\",\"time\":\"%s\"}",
                 v.questId or 0,
                 v.title or "Unknown Title",
                 v.giver or "Unknown NPC",
                 v.location or "Unknown Zone",
-                v.date or "Unknown Date"
+                v.date or "Unknown Date",
+                v.time or "Unknown Time"
             )
             table.insert(result, line)
         end
