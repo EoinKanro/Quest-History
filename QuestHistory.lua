@@ -336,7 +336,7 @@ function QH.ExportData(date)
                 v.questId or 0,
                 v.title or "Unknown Title",
                 v.giver or "Unknown NPC",
-                v.location or "Unknown Location",
+                v.location or "Unknown Zone",
                 v.date or "Unknown Date"
             )
             table.insert(result, line)
@@ -541,7 +541,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         QH.LogInfo("Quest accepted " .. questId)
 
         local title = C_QuestLog.GetTitleForQuestID(questId)
-        local npcName = lastQuestGiver or UnitName("target")
+        local npcName = lastQuestGiver or UnitName("target") or "Unknown NPC"
         local location = GetZoneText()
         lastQuestGiver = nil
 
