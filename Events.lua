@@ -113,7 +113,12 @@ function QHEventsFrame:QUEST_COMPLETE(event)
     end
 end
 
+function QHEventsFrame:QUEST_TURNED_IN(event, questId)
+    QH.SaveQuest(questId)
+end
+
 QHEventsFrame:RegisterEvent("QUEST_DETAIL")
 QHEventsFrame:RegisterEvent("QUEST_PROGRESS")
 QHEventsFrame:RegisterEvent("QUEST_COMPLETE")
+QHEventsFrame:RegisterEvent("QUEST_TURNED_IN")
 QHEventsFrame:SetScript("OnEvent", QHEventsFrame.OnEvent)
