@@ -7,6 +7,24 @@ local backupCategory, backupLayout = Settings.RegisterVerticalLayoutSubcategory(
 local debugCategory, debugLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Debug")
 local exportCategory, exportLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Export")
 
+-- =========================
+-- Description
+-- =========================
+do
+   local name = "QuestHistory"
+   local version = C_AddOns.GetAddOnMetadata(name, "Version")
+   local author = C_AddOns.GetAddOnMetadata(name, "Author")
+
+   local function CreateTextInitializer(text)
+       return Settings.CreateElementInitializer("SettingsListSectionHeaderTemplate", {name = text})
+   end
+
+   mainLayout:AddInitializer(CreateTextInitializer("Version: " .. version .. "\n\nAuthor: " .. author))
+end
+
+-- =========================
+-- Settings
+-- =========================
 do
     local name = "Save repeatable quests"
     local variable = "QuestHistory_SaveRepeatable"
