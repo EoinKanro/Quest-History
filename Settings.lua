@@ -33,19 +33,19 @@ end
 
 do
     local name = "Enable backup to chat log"
-    local variable = "QuestHistory_EnableLogBackup"
+    local variable = "QuestHistory_EnableChatBackup"
     local defaultValue = true
 
-    if QuestHistorySettingsDB.enableLogBackup == nil then
-        QuestHistorySettingsDB.enableLogBackup = defaultValue
+    if QuestHistorySettingsDB.enableChatBackup == nil then
+        QuestHistorySettingsDB.enableChatBackup = defaultValue
     end
 
     local function GetValue()
-        return QuestHistorySettingsDB.enableLogBackup
+        return QuestHistorySettingsDB.enableChatBackup
     end
 
     local function SetValue(value)
-        QuestHistorySettingsDB.enableLogBackup = value
+        QuestHistorySettingsDB.enableChatBackup = value
     end
 
     local function OnSettingChanged(_, value)

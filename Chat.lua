@@ -14,7 +14,7 @@ end
 -- =========================
 function QH.ReloadChatLogging(value)
     if value == nil then
-        value = QuestHistorySettingsDB.enableLogBackup
+        value = QuestHistorySettingsDB.enableChatBackup
     end
     if value == nil then
         value = true

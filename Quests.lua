@@ -3,6 +3,7 @@ if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
 if not QuestHistoryHistoryDB then QuestHistoryHistoryDB = {} end
 
 local completedQuests = 0
+local chatLoggingLoaded = false
 
 -- =========================
 -- Save quest to database and chat log
@@ -32,8 +33,12 @@ function QH.SaveQuest(questId)
         end
     end
 
-    local enableLogBackup = QuestHistorySettingsDB.enableLogBackup
-    if enableLogBackup == true then
+    local enableChatBackup = QuestHistorySettingsDB.enableChatBackup
+    if enableChatBackup == true then
+        if chatLoggingLoaded == false then
+            chatLoggingLoaded = true
+            QH.ReloadChatLogging()
+        end
         SendChatMessage("[QH] " .. questId, "WHISPER", nil, UnitName("player"))
     end
 
