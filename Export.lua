@@ -6,55 +6,6 @@ if not QuestHistoryHistoryDB then QuestHistoryHistoryDB = {} end
 local unknown = "Unknown"
 
 -- =========================
--- Export dates backwords
--- =========================
-function QH.GetDates()
-    local keys = {}
-    for key in pairs(QuestHistoryHistoryDB) do
-        table.insert(keys, key)
-    end
-
-    table.sort(keys, function(a, b)
-        local dayA, monthA, yearA = a:match("(%d+)%.(%d+)%.(%d+)")
-        local dayB, monthB, yearB = b:match("(%d+)%.(%d+)%.(%d+)")
-
-        if yearA ~= yearB then return yearA > yearB end
-        if monthA ~= monthB then return monthA > monthB end
-        return dayA > dayB
-    end)
-
-    return keys
-end
-
-function QH.ExportData(date)
-    if not QuestHistoryHistoryDB or QuestHistoryHistoryDB[date] == nil then
-        return "No data"
-    end
-
-    local result = {}
-
-    for _, v in ipairs(QuestHistoryHistoryDB[date]) do
-        local quest = QuestHistoryQuestsDB[v.id] or {}
-        local line = string.format(
-            "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"descriptionText\":\"%s\",\"objectiveText\":\"%s\",\"progressText\":\"%s\",\"completeText\":\"%s\"}",
-            v.id or 0,
-            v.date,
-            v.time,
-            quest.title or unknown,
-            quest.giver or unknown,
-            quest.location or unknown,
-            quest.descriptionText or unknown,
-            quest.objectiveText or unknown,
-            quest.progressText or unknown,
-            quest.completeText or unknown
-        )
-        table.insert(result, line)
-    end
-
-    return "[" .. table.concat(result, ",\n") .. "]"
-end
-
--- =========================
 -- Export menu popup with buttons
 -- =========================
 function QH.ShowExportMenuPopup(buttonData)
@@ -214,4 +165,53 @@ function QH.ShowExportPopup(text)
 
     exportFrame:Show()
     editBox:SetFocus()
+end
+
+-- =========================
+-- Export dates backwords
+-- =========================
+function QH.GetDates()
+    local keys = {}
+    for key in pairs(QuestHistoryHistoryDB) do
+        table.insert(keys, key)
+    end
+
+    table.sort(keys, function(a, b)
+        local dayA, monthA, yearA = a:match("(%d+)%.(%d+)%.(%d+)")
+        local dayB, monthB, yearB = b:match("(%d+)%.(%d+)%.(%d+)")
+
+        if yearA ~= yearB then return yearA > yearB end
+        if monthA ~= monthB then return monthA > monthB end
+        return dayA > dayB
+    end)
+
+    return keys
+end
+
+function QH.ExportData(date)
+    if not QuestHistoryHistoryDB or QuestHistoryHistoryDB[date] == nil then
+        return "No data"
+    end
+
+    local result = {}
+
+    for _, v in ipairs(QuestHistoryHistoryDB[date]) do
+        local quest = QuestHistoryQuestsDB[v.id] or {}
+        local line = string.format(
+            "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"descriptionText\":\"%s\",\"objectiveText\":\"%s\",\"progressText\":\"%s\",\"completeText\":\"%s\"}",
+            v.id or 0,
+            v.date,
+            v.time,
+            quest.title or unknown,
+            quest.giver or unknown,
+            quest.location or unknown,
+            quest.descriptionText or unknown,
+            quest.objectiveText or unknown,
+            quest.progressText or unknown,
+            quest.completeText or unknown
+        )
+        table.insert(result, line)
+    end
+
+    return "[" .. table.concat(result, ",\n") .. "]"
 end

@@ -47,8 +47,8 @@ function QH.SaveQuest(questId)
 
     -- Show warning
     completedQuests = completedQuests + 1
-    local enableBackupWarning = QuestHistorySettingsDB.enableBackupWarning
-    if enableBackupWarning ~= true then
+    local enableReloadWarning = QuestHistorySettingsDB.enableReloadWarning
+    if enableReloadWarning ~= true then
         return
     end
 

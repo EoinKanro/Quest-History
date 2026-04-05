@@ -1,7 +1,35 @@
 if not QH then QH = {} end
 if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
 
-local category, layout = Settings.RegisterVerticalLayoutCategory("Quest History")
+local mainCategory, mainLayout = Settings.RegisterVerticalLayoutCategory("Quest History")
+local generalCategory, generalLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "General")
+local backupCategory, backupLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Backup")
+local debugCategory, debugLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Debug")
+local exportCategory, exportLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Export")
+
+do
+    local name = "Save repeatable quests"
+    local variable = "QuestHistory_SaveRepeatable"
+    local defaultValue = true
+
+    if QuestHistorySettingsDB.saveRepeatable == nil then
+        QuestHistorySettingsDB.saveRepeatable = defaultValue
+    end
+
+    local function GetValue()
+        return QuestHistorySettingsDB.saveRepeatable
+    end
+
+    local function SetValue(value)
+        QuestHistorySettingsDB.saveRepeatable = value
+    end
+
+    local setting = Settings.RegisterProxySetting(generalCategory, variable, type(defaultValue), name, defaultValue, GetValue,
+        SetValue)
+
+    local tooltip = "You may not want to save daily quests"
+    Settings.CreateCheckbox(generalCategory, setting, tooltip)
+end
 
 do
     local name = "Enable backup to chat log"
@@ -24,68 +52,44 @@ do
         QH.ReloadChatLogging(value)
     end
 
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue,
+    local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
     setting:SetValueChangedCallback(OnSettingChanged)
 
     local tooltip =
-    "Backup info about completed quests to chat log. If switched off, you can lose your data if game crashes"
-    Settings.CreateCheckbox(category, setting, tooltip)
+    "You will see messages from yourself in chat with ids of quests. If you game crashes you will be able to restore the history using World of Warcraft/_retail_/Logs/WowChat.log"
+    Settings.CreateCheckbox(backupCategory, setting, tooltip)
 end
 
 do
-    local name = "Save repeatable quests"
-    local variable = "QuestHistory_SaveRepeatable"
+    local name = "Enable reload warning"
+    local variable = "QuestHistory_EnableReloadWarning"
     local defaultValue = true
 
-    if QuestHistorySettingsDB.saveRepeatable == nil then
-        QuestHistorySettingsDB.saveRepeatable = defaultValue
+    if QuestHistorySettingsDB.enableReloadWarning == nil then
+        QuestHistorySettingsDB.enableReloadWarning = defaultValue
     end
 
     local function GetValue()
-        return QuestHistorySettingsDB.saveRepeatable
+        return QuestHistorySettingsDB.enableReloadWarning
     end
 
     local function SetValue(value)
-        QuestHistorySettingsDB.saveRepeatable = value
+        QuestHistorySettingsDB.enableReloadWarning = value
     end
 
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue,
-        SetValue)
-
-    local tooltip = "Save or not repeatable quests to history"
-    Settings.CreateCheckbox(category, setting, tooltip)
-end
-
-do
-    local name = "Enable backup warning"
-    local variable = "QuestHistory_EnableBackupWarning"
-    local defaultValue = true
-
-    if QuestHistorySettingsDB.enableBackupWarning == nil then
-        QuestHistorySettingsDB.enableBackupWarning = defaultValue
-    end
-
-    local function GetValue()
-        return QuestHistorySettingsDB.enableBackupWarning
-    end
-
-    local function SetValue(value)
-        QuestHistorySettingsDB.enableBackupWarning = value
-    end
-
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue,
+    local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
     local tooltip =
-    "Warn to do /reload if you completed a lot of quests. It's important bcz if your game crashes then all your data from the session will be lost. WoW saves data to disk only on reload or exit."
-    Settings.CreateCheckbox(category, setting, tooltip)
+    "Warn to do /reload if you've completed a lot of quests. There is a WoW limitation that it saves database only on reload or exit. So if your game crashes you can loose you history. Do /reload time to time"
+    Settings.CreateCheckbox(backupCategory, setting, tooltip)
 end
 
 do
-    local name = "Show popup for reload on warning"
+    local name = "Show popup on warning"
     local variable = "QuestHistory_ShowPopupOnWarning"
-    local defaultValue = false
+    local defaultValue = true
 
     if QuestHistorySettingsDB.showPopupOnWarning == nil then
         QuestHistorySettingsDB.showPopupOnWarning = defaultValue
@@ -99,11 +103,11 @@ do
         QuestHistorySettingsDB.showPopupOnWarning = value
     end
 
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue,
+    local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip = "Show popup when you hit max amount of completed quests. It will reload your interface on accept"
-    Settings.CreateCheckbox(category, setting, tooltip)
+    local tooltip = "Show warning popup instead of chat notification. On accept it will call /reload automatically"
+    Settings.CreateCheckbox(backupCategory, setting, tooltip)
 end
 
 do
@@ -126,13 +130,13 @@ do
         QuestHistorySettingsDB.warningQuestsAmount = value
     end
 
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue,
+    local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
     local tooltip = "Amount of quests you need to complete to get a warning"
     local options = Settings.CreateSliderOptions(minValue, maxValue, step)
     options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
-    Settings.CreateSlider(category, setting, options, tooltip)
+    Settings.CreateSlider(backupCategory, setting, options, tooltip)
 end
 
 do
@@ -152,11 +156,35 @@ do
         QuestHistorySettingsDB.enableDebugLogging = value
     end
 
-    local setting = Settings.RegisterProxySetting(category, variable, type(defaultValue), name, defaultValue, GetValue,
+    local setting = Settings.RegisterProxySetting(debugCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip = "Log additional info to chat"
-    Settings.CreateCheckbox(category, setting, tooltip)
+    local tooltip = "Log additional debug info to chat"
+    Settings.CreateCheckbox(debugCategory, setting, tooltip)
+end
+
+do
+    local name = "Enable export descriptions of quests"
+    local variable = "QuestHistory_EnableExportDescriptionsOfQuests"
+    local defaultValue = true
+
+    if QuestHistorySettingsDB.enableExportDescriptionsOfQuests == nil then
+        QuestHistorySettingsDB.enableExportDescriptionsOfQuests = defaultValue
+    end
+
+    local function GetValue()
+        return QuestHistorySettingsDB.enableExportDescriptionsOfQuests
+    end
+
+    local function SetValue(value)
+        QuestHistorySettingsDB.enableExportDescriptionsOfQuests = value
+    end
+
+    local setting = Settings.RegisterProxySetting(exportCategory, variable, type(defaultValue), name, defaultValue, GetValue,
+        SetValue)
+
+    local tooltip = "Export descriptions of quests like main text, progress and on complete"
+    Settings.CreateCheckbox(exportCategory, setting, tooltip)
 end
 
 do
@@ -188,7 +216,7 @@ do
         nil
     )
 
-    layout:AddInitializer(exportButton)
+    exportLayout:AddInitializer(exportButton)
 end
 
-Settings.RegisterAddOnCategory(category)
+Settings.RegisterAddOnCategory(mainCategory)
