@@ -194,22 +194,37 @@ function QH.ExportData(date)
     end
 
     local result = {}
+    local exportDescription = QuestHistorySettingsDB.enableExportDescriptionsOfQuests
 
     for _, v in ipairs(QuestHistoryHistoryDB[date]) do
         local quest = QuestHistoryQuestsDB[v.id] or {}
-        local line = string.format(
-            "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"descriptionText\":\"%s\",\"objectiveText\":\"%s\",\"progressText\":\"%s\",\"completeText\":\"%s\"}",
-            v.id or 0,
-            v.date,
-            v.time,
-            quest.title or unknown,
-            quest.giver or unknown,
-            quest.location or unknown,
-            quest.descriptionText or unknown,
-            quest.objectiveText or unknown,
-            quest.progressText or unknown,
-            quest.completeText or unknown
-        )
+        local line = nil
+        if exportDescription == true then
+            line = string.format(
+                "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"descriptionText\":\"%s\",\"objectiveText\":\"%s\",\"progressText\":\"%s\",\"completeText\":\"%s\"}",
+                v.id or 0,
+                v.date,
+                v.time,
+                quest.title or unknown,
+                quest.giver or unknown,
+                quest.location or unknown,
+                quest.descriptionText or unknown,
+                quest.objectiveText or unknown,
+                quest.progressText or unknown,
+                quest.completeText or unknown
+            )
+        else
+            line = string.format(
+                "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\"}",
+                v.id or 0,
+                v.date,
+                v.time,
+                quest.title or unknown,
+                quest.giver or unknown,
+                quest.location or unknown
+            )
+        end
+
         table.insert(result, line)
     end
 
