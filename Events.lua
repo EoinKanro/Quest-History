@@ -25,6 +25,7 @@ function QHEventsFrame:QUEST_DETAIL(event, questStartItemID)
     local title = GetTitleText() or unknown
     local description = GetQuestText() or unknown
     local objective = GetObjectiveText() or unknown
+    local location = GetZoneText() or unknown
 
     local giver = nil
     if questStartItemID ~= nil then
@@ -42,6 +43,7 @@ function QHEventsFrame:QUEST_DETAIL(event, questStartItemID)
     questDetails.id = questId
     questDetails.title = title
     questDetails.giver = giver
+    questDetails.location = location
     questDetails.descriptionText = description
     questDetails.objectiveText = objective
 
