@@ -76,3 +76,18 @@ function QH.SaveCurrentQuest()
        QH.LogError("No active quest. Talk to NPC or open quest log")
     end
 end
+
+-- =========================
+-- Popup for reloading
+-- =========================
+StaticPopupDialogs["QuestHistory_ReloadConfirmPopup"] = {
+    text = "You hit max amount of completed quests. Reload?",
+    button1 = "Yes",
+    button2 = "No",
+    OnAccept = function()
+        ReloadUI()
+    end,
+    timeout = 0,
+    whileDead = true,
+    hideOnEscape = true,
+}
