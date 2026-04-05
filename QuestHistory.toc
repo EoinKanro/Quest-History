@@ -3,10 +3,14 @@
 ## Title: Quest History
 ## Author: EoinKanro
 ## IconTexture: Interface\AddOns\QuestHistory\icon.tga
-## SavedVariables: QuestHistoryNpcDB, QuestHistoryLocationDB, QuestHistoryTitleDB
-## SavedVariablesPerCharacter: QuestHistoryDB, QuestHistoryDateDB, QuestHistorySettingsDB
+## LoadSavedVariablesFirst: 1
+## SavedVariables: QuestHistoryQuestsDB
+## SavedVariablesPerCharacter: QuestHistorySettingsDB, QuestHistoryHistoryDB
 
 ## Notes: Saves history of completed quests for each character. Then you can export it to json.
 
-QuestHistoryUtils.lua
-QuestHistory.lua
+Chat.lua
+Quests.lua
+Settings.lua
+Export.lua
+Events.lua
