@@ -1,5 +1,5 @@
 ## Interface: 120001
-## Version: 1.1.2
+## Version: 1.1.3
 ## Title: Quest History
 ## Author: EoinKanro
 ## IconTexture: Interface\AddOns\QuestHistory\icon.tga
