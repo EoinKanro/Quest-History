@@ -72,7 +72,7 @@ function QHEventsFrame:QUEST_DETAIL(event, questStartItemID)
     local questId = GetQuestID()
     if questId == nil or questId == 0 then
         if enableDebugLogging == true then
-            QH.LogError("Can't process current quest with id nil")
+            QH.LogError(QH.Locale.EventsQuestIdNil)
         end
         return
     end
@@ -106,7 +106,7 @@ function QHEventsFrame:QUEST_PROGRESS(event)
     local questId = GetQuestID()
     if questId == nil then
         if enableDebugLogging == true then
-            QH.LogError("Can't process current quest with id nil")
+            QH.LogError(QH.Locale.EventsQuestIdNil)
         end
         return
     end
@@ -114,7 +114,7 @@ function QHEventsFrame:QUEST_PROGRESS(event)
     local progress = GetProgressText()
     if progress == nil then
         if enableDebugLogging == true then
-            QH.LogError("Can't process current quest with progress text nil")
+            QH.LogError(QH.Locale.EventsProgressTextNil)
         end
         return
     end
@@ -136,7 +136,7 @@ function QHEventsFrame:QUEST_COMPLETE(event)
     local questId = GetQuestID()
     if questId == nil then
         if enableDebugLogging == true then
-            QH.LogError("Can't process current quest with id nil")
+            QH.LogError(QH.Locale.EventsQuestIdNil)
         end
         return
     end
@@ -144,7 +144,7 @@ function QHEventsFrame:QUEST_COMPLETE(event)
     local complete = GetRewardText()
     if complete == nil then
         if enableDebugLogging == true then
-            QH.LogError("Can't process current quest with complete text nil")
+            QH.LogError(QH.Locale.EventsCompleteTextNil)
         end
         return
     end

@@ -32,7 +32,7 @@ function QH.ShowExportMenuPopup(buttonData)
 
         local title = exportMenuFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
         title:SetPoint("TOP", 0, -10)
-        title:SetText("Quest History Export")
+        title:SetText(QH.Locale.ExportTitle)
 
         local closeButton = CreateFrame("Button", nil, exportMenuFrame, "UIPanelCloseButton")
         closeButton:SetPoint("TOPRIGHT", 0, 0)
@@ -115,7 +115,7 @@ function QH.ShowExportPopup(text)
 
         local title = exportFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
         title:SetPoint("TOP", 0, -10)
-        title:SetText("Quest History Export")
+        title:SetText(QH.Locale.ExportTitle)
 
         local closeButton = CreateFrame("Button", nil, exportFrame, "UIPanelCloseButton")
         closeButton:SetPoint("TOPRIGHT", 0, 0)
@@ -190,7 +190,7 @@ end
 
 function QH.ExportData(date)
     if not QuestHistoryHistoryDB or QuestHistoryHistoryDB[date] == nil then
-        return "No data"
+        return QH.Locale.ExportNoData
     end
 
     local result = {}
@@ -199,6 +199,7 @@ function QH.ExportData(date)
     for _, v in ipairs(QuestHistoryHistoryDB[date]) do
         local quest = QuestHistoryQuestsDB[v.id] or {}
         local line = nil
+        --todo json
         if exportDescription == true then
             line = string.format(
                 "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"descriptionText\":\"%s\",\"objectiveText\":\"%s\",\"progressText\":\"%s\",\"completeText\":\"%s\"}",

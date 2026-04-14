@@ -10,7 +10,7 @@ local chatLoggingLoaded = false
 -- =========================
 function QH.SaveQuest(questId)
     if questId == nil or questId == 0 then
-        QH.LogError("Can't process quest with nil id")
+        QH.LogError(QH.Locale.EventsQuestIdNil)
         return
     end
 
@@ -28,7 +28,7 @@ function QH.SaveQuest(questId)
     if saveRepeatable == false then
         local isRepeatable = C_QuestLog.IsRepeatableQuest(questID)
         if isRepeatable == true then
-            QH.LogError("Quest " .. questId .. " is repeatable. Skipping.")
+            QH.LogError(string.format(QH.Locale.QuestsRepeatable, questId))
             return
         end
     end
@@ -48,7 +48,7 @@ function QH.SaveQuest(questId)
     -- Save quest
     table.insert(questDetails, entry)
 
-    QH.LogInfo("Saved " .. questId)
+    QH.LogInfo(string.format(QH.Locale.QuestsSaved, questId))
 
     -- Show warning
     completedQuests = completedQuests + 1
@@ -63,7 +63,7 @@ function QH.SaveQuest(questId)
         if showPopupOnWarning == true then
             StaticPopup_Show("QuestHistory_ReloadConfirmPopup")
         else
-            QH.LogError("Send /reload to chat to save your progress")
+            QH.LogError(QH.Locale.QuestsChatReloadWarning)
         end
     end
 end
@@ -86,9 +86,9 @@ end
 -- Popup for reloading
 -- =========================
 StaticPopupDialogs["QuestHistory_ReloadConfirmPopup"] = {
-    text = "You hit max amount of completed quests. Reload?",
-    button1 = "Yes",
-    button2 = "No",
+    text = QH.Locale.QuestsPopupReloadWarning,
+    button1 = QH.Locale.QuestsPopupReloadWarningYes,
+    button2 = QH.Locale.QuestsPopupReloadWarningNo,
     OnAccept = function()
         ReloadUI()
     end,

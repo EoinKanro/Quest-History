@@ -22,8 +22,8 @@ function QH.ReloadChatLogging(value)
 
     LoggingChat(value)
     if value == true then
-        QH.LogInfo("Chat logging activated")
+        QH.LogInfo(QH.Locale.ChatLoggingActive)
     else
-        QH.LogInfo("Chat logging deactivated")
+        QH.LogInfo(QH.Locale.ChatLoggingInactive)
     end
 end

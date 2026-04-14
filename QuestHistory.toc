@@ -9,6 +9,7 @@
 
 ## Notes: Saves history of completed quests for each character. Then you can export it to json.
 
+Localization.lua
 Chat.lua
 Quests.lua
 Settings.lua

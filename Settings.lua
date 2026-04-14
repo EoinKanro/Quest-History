@@ -2,10 +2,10 @@ if not QH then QH = {} end
 if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
 
 local mainCategory, mainLayout = Settings.RegisterVerticalLayoutCategory("Quest History")
-local generalCategory, generalLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "General")
-local backupCategory, backupLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Backup")
-local debugCategory, debugLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Debug")
-local exportCategory, exportLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, "Export")
+local generalCategory, generalLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, QH.Locale.SettingsGeneral)
+local backupCategory, backupLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, QH.Locale.SettingsBackup)
+local debugCategory, debugLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, QH.Locale.SettingsDebug)
+local exportCategory, exportLayout = Settings.RegisterVerticalLayoutSubcategory(mainCategory, QH.Locale.SettingsExport)
 
 -- =========================
 -- Description
@@ -26,7 +26,7 @@ end
 -- Settings
 -- =========================
 do
-    local name = "Save repeatable quests"
+    local name = QH.Locale.SettingsSaveRepeatableQuests
     local variable = "QuestHistory_SaveRepeatable"
     local defaultValue = true
 
@@ -45,12 +45,12 @@ do
     local setting = Settings.RegisterProxySetting(generalCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip = "You may not want to save daily quests"
+    local tooltip = QH.Locale.SettingsSaveRepeatableQuestsTooltip
     Settings.CreateCheckbox(generalCategory, setting, tooltip)
 end
 
 do
-    local name = "Enable backup to chat log"
+    local name = QH.Locale.SettingsEnableBackupToChat
     local variable = "QuestHistory_EnableChatBackup"
     local defaultValue = true
 
@@ -74,13 +74,12 @@ do
         SetValue)
     setting:SetValueChangedCallback(OnSettingChanged)
 
-    local tooltip =
-    "You will see messages from yourself in chat with ids of quests. If you game crashes you will be able to restore the history using World of Warcraft/_retail_/Logs/WowChat.log"
+    local tooltip = QH.Locale.SettingsEnableBackupToChatTooltip
     Settings.CreateCheckbox(backupCategory, setting, tooltip)
 end
 
 do
-    local name = "Enable reload warning"
+    local name = QH.Locale.SettingsEnableReloadWarning
     local variable = "QuestHistory_EnableReloadWarning"
     local defaultValue = true
 
@@ -99,13 +98,12 @@ do
     local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip =
-    "Warn to do /reload if you've completed a lot of quests. There is a WoW limitation that it saves database only on reload or exit. So if your game crashes you can loose you history. Do /reload time to time"
+    local tooltip = QH.Locale.SettingsEnableReloadWarningTooltip
     Settings.CreateCheckbox(backupCategory, setting, tooltip)
 end
 
 do
-    local name = "Show popup on warning"
+    local name = QH.Locale.SettingsShowPopupOnWarning
     local variable = "QuestHistory_ShowPopupOnWarning"
     local defaultValue = true
 
@@ -124,12 +122,12 @@ do
     local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip = "Show warning popup instead of chat notification. On accept it will call /reload automatically"
+    local tooltip = QH.Locale.SettingsShowPopupOnWarningTooltip
     Settings.CreateCheckbox(backupCategory, setting, tooltip)
 end
 
 do
-    local name = "Warning quests amount"
+    local name = QH.Locale.SettingsWarningQuestAmount
     local variable = "QuestHistory_WarningQuestsAmount"
     local defaultValue = 10
     local minValue = 1
@@ -151,7 +149,7 @@ do
     local setting = Settings.RegisterProxySetting(backupCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip = "Amount of quests you need to complete to get a warning"
+    local tooltip = QH.Locale.SettingsWarningQuestAmountTooltip
     local options = Settings.CreateSliderOptions(minValue, maxValue, step)
     options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right);
     Settings.CreateSlider(backupCategory, setting, options, tooltip)
@@ -182,7 +180,7 @@ do
 end
 
 do
-    local name = "Enable export descriptions of quests"
+    local name = QH.Locale.SettingsEnableExportDescriptionsOfQuests
     local variable = "QuestHistory_EnableExportDescriptionsOfQuests"
     local defaultValue = true
 
@@ -201,14 +199,14 @@ do
     local setting = Settings.RegisterProxySetting(exportCategory, variable, type(defaultValue), name, defaultValue, GetValue,
         SetValue)
 
-    local tooltip = "Export descriptions of quests like main text, progress and on complete"
+    local tooltip = QH.Locale.SettingsEnableExportDescriptionsOfQuestsTooltip
     Settings.CreateCheckbox(exportCategory, setting, tooltip)
 end
 
 do
     local exportButton = CreateSettingsButtonInitializer(
-        "Export Data",
-        "Export",
+        QH.Locale.SettingsExportHistory,
+        QH.Locale.SettingsExport,
         function()
             local years = QH.GetDates()
             local buttons = {}
@@ -228,7 +226,7 @@ do
 
             QH.ShowExportMenuPopup(buttons)
         end,
-        "Export your quest history",
+        QH.Locale.SettingsExportTooltip,
         true,
         nil,
         nil
