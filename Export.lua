@@ -188,6 +188,16 @@ function QH.GetDates()
     return keys
 end
 
+local function PrepareJsonValue(value)
+    if value == nil then
+        return unknown
+    end
+
+    value = value:gsub('"', '\\"')
+    value = value:gsub("\n", "")
+    return value
+end
+
 function QH.ExportData(date)
     if not QuestHistoryHistoryDB or QuestHistoryHistoryDB[date] == nil then
         return QH.Locale.ExportNoData
@@ -199,20 +209,19 @@ function QH.ExportData(date)
     for _, v in ipairs(QuestHistoryHistoryDB[date]) do
         local quest = QuestHistoryQuestsDB[v.id] or {}
         local line = nil
-        --todo json
         if exportDescription == true then
             line = string.format(
                 "{\"questId\":%d,\"date\":\"%s\",\"time\":\"%s\",\"title\":\"%s\",\"giver\":\"%s\",\"location\":\"%s\",\"descriptionText\":\"%s\",\"objectiveText\":\"%s\",\"progressText\":\"%s\",\"completeText\":\"%s\"}",
                 v.id or 0,
                 v.date,
                 v.time,
-                quest.title or unknown,
-                quest.giver or unknown,
-                quest.location or unknown,
-                quest.descriptionText or unknown,
-                quest.objectiveText or unknown,
-                quest.progressText or unknown,
-                quest.completeText or unknown
+                PrepareJsonValue(quest.title),
+                PrepareJsonValue(quest.giver),
+                PrepareJsonValue(quest.location),
+                PrepareJsonValue(quest.descriptionText),
+                PrepareJsonValue(quest.objectiveText),
+                PrepareJsonValue(quest.progressText),
+                PrepareJsonValue(quest.completeText)
             )
         else
             line = string.format(
@@ -220,9 +229,9 @@ function QH.ExportData(date)
                 v.id or 0,
                 v.date,
                 v.time,
-                quest.title or unknown,
-                quest.giver or unknown,
-                quest.location or unknown
+                PrepareJsonValue(quest.title),
+                PrepareJsonValue(quest.giver),
+                PrepareJsonValue(quest.location)
             )
         end
 
