@@ -50,6 +50,38 @@ do
 end
 
 do
+    local name = QH.Locale.SettingsLanguage
+    local variable = "QuestHistory_Language"
+    local defaultValue = "en"
+
+    if QuestHistorySettingsDB.language == nil then
+        QuestHistorySettingsDB.language = defaultValue
+    end
+
+    local function GetValue()
+        return QuestHistorySettingsDB.language
+    end
+
+    local function SetValue(value)
+        QuestHistorySettingsDB.language = value
+        QH.ReloadAddonLanguage(value)
+    end
+
+    local function GetOptions()
+        local container = Settings.CreateControlTextContainer()
+        container:Add("en", "English")
+        container:Add("ru", "Русский")
+        return container:GetData()
+    end
+
+    local setting = Settings.RegisterProxySetting(generalCategory,variable, type(defaultValue), name, defaultValue,
+        GetValue, SetValue)
+
+    local tooltip = QH.Locale.SettingsLanguageTooltip
+    Settings.CreateDropdown(generalCategory, setting, GetOptions, tooltip)
+end
+
+do
     local name = QH.Locale.SettingsEnableBackupToChat
     local variable = "QuestHistory_EnableChatBackup"
     local defaultValue = true
