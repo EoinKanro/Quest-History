@@ -194,7 +194,7 @@ local function PrepareJsonValue(value)
     end
 
     value = value:gsub('"', '\\"')
-    value = value:gsub("\n", "")
+    value = value:gsub("\n", " ")
     return value
 end
 
