@@ -200,17 +200,23 @@ function QHEventsFrame:PLAYER_LOGIN(event)
 
     local MAX_BACKUP_ENTRIES = 50
     local backup = QuestHistoryBackupDB.backup or {}
-    backup[time()] = backupQuests
 
-    -- remove oldest if hit the limit
-    local keys = {}
-    for k in pairs(backup) do
-        table.insert(keys, k)
+    local backupDate = date("%d.%m.%Y")
+    local savedBackupQuests = backup[backupDate]
+    if savedBackupQuests == nil then
+        backup[backupDate] = backupQuests
+    else
+        for _, v in ipairs(backupQuests) do
+            table.insert(savedBackupQuests, v)
+        end
+        backup[backupDate] = savedBackupQuests
     end
 
-    if #keys > MAX_BACKUP_ENTRIES then
-        table.sort(keys)
-        backup[keys[1]] = nil
+    -- remove oldest if hit the limit
+    local dates = QH.GetBackupDates()
+
+    if #dates > MAX_BACKUP_ENTRIES then
+        backup[dates[#dates]] = nil
     end
 
     QuestHistoryBackupDB.backup = backup

@@ -193,20 +193,14 @@ do
         QH.Locale.SettingsExport,
         function()
             local dates = QH.GetBackupDates()
-            local datesKeys = {}
-            for k in pairs(dates) do
-                table.insert(datesKeys, k)
-            end
-            QH.SortDates(datesKeys)
-
             local buttons = {}
-            for _, k in ipairs(datesKeys) do
-                local keys = dates[k]
+
+            for _, date in ipairs(dates) do
                 local buttonData = {
-                    text = k,
+                    text = date,
                     callback = function()
                         QH.ExportMenuFrame:Hide()
-                        local data = QH.ExportBackup(keys)
+                        local data = QH.ExportBackup(date)
                         QH.ShowExportPopup(data)
                     end
                 }
@@ -278,15 +272,15 @@ do
         QH.Locale.SettingsExportHistory,
         QH.Locale.SettingsExport,
         function()
-            local years = QH.GetDates()
+            local dates = QH.GetDates()
             local buttons = {}
 
-            for _, v in ipairs(years) do
+            for _, date in ipairs(dates) do
                 local buttonData = {
-                    text = v,
+                    text = date,
                     callback = function()
                         QH.ExportMenuFrame:Hide()
-                        local data = QH.ExportData(v)
+                        local data = QH.ExportData(date)
                         QH.ShowExportPopup(data)
                     end
                 }

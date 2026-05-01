@@ -238,32 +238,28 @@ end
 -- Export dates - keys from backup
 -- =========================
 function QH.GetBackupDates()
-    local keys = {}
+    local dates = {}
 
     local backup = QuestHistoryBackupDB.backup or {}
-    for k in pairs(backup) do
-        local day = date("%d.%m.%Y", k)
-        local dateKeys = keys[day] or {}
-        table.insert(dateKeys, k)
-        keys[day] = dateKeys
+    for day in pairs(backup) do
+        table.insert(dates, day)
     end
+    QH.SortDates(dates)
 
-    return keys
+    return dates
 end
 
 -- =========================
--- Export unsorted ids of the keys from backup
+-- Export unsorted ids from the day
 -- =========================
-function QH.ExportBackup(backupKeys)
+function QH.ExportBackup(day)
     local backup = QuestHistoryBackupDB.backup or {}
     local result = {}
 
-    for _, k in ipairs(backupKeys) do
-        local backupData = backup[k]
-        if backupData ~= nil then
-            for _, questId in ipairs(backupData) do
-                table.insert(result, questId)
-            end
+    local backupData = backup[day]
+    if backupData ~= nil then
+        for _, questId in ipairs(backupData) do
+            table.insert(result, questId)
         end
     end
     return "[" .. table.concat(result, ",\n") .. "]"
