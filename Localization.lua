@@ -8,6 +8,11 @@ function QH.ReloadAddonLanguage(locale)
         QH.Locale.ChatLoggingActive = "Сохранение чата активировано"
         QH.Locale.ChatLoggingInactive = "Сохранение чата выключено"
 
+        QH.Locale.BackupLastSessionStarted = "Начинаю бекап id квестов с прошлой сессии..."
+        QH.Locale.BackupLastSessionFirstRun = "Сохранены id всех выполненных квестов. Проверка сессии будет выполнена в следующий раз"
+        QH.Locale.BackupLastSessionNothingToBackup = "Бекап выполнен. Нет новых выполненных квестов с последней сессии"
+        QH.Locale.BackupLastSessionFinished = "Бекап id квестов с прошлой сессии выполнен"
+
         QH.Locale.EventsQuestIdNil = "Не удается получить id квеста"
         QH.Locale.EventsProgressTextNil = "Не удается получить текс прогресса квеста"
         QH.Locale.EventsCompleteTextNil = "Не удается получить текст завершения квеста"
@@ -45,6 +50,11 @@ function QH.ReloadAddonLanguage(locale)
     else
         QH.Locale.ChatLoggingActive = "Chat logging activated"
         QH.Locale.ChatLoggingInactive = "Chat logging deactivated"
+
+        QH.Locale.BackupLastSessionStarted = "Starting backup of quest IDs from last session..."
+        QH.Locale.BackupLastSessionFirstRun = "Saved all completed quests. Will check session next time"
+        QH.Locale.BackupLastSessionNothingToBackup = "Backup completed. No completed quests since last sessions"
+        QH.Locale.BackupLastSessionFinished = "Backup of quest IDs from last session completed"
 
         QH.Locale.EventsQuestIdNil = "Can't process current quest with id nil"
         QH.Locale.EventsProgressTextNil = "Can't process current quest with progress text nil"

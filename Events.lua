@@ -1,6 +1,7 @@
 if not QH then QH = {} end
 if not QuestHistoryQuestsDB then QuestHistoryQuestsDB = {} end
 if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
+if not QuestHistoryBackupDB then QuestHistoryBackupDB = {} end
 
 local npcUnit = "npc"
 local unknown = "Unknown"
@@ -169,10 +170,59 @@ function QHEventsFrame:QUEST_TURNED_IN(event, questId)
     QH.SaveQuest(questId)
 end
 
+function QHEventsFrame:PLAYER_LOGIN(event)
+    QH.LogInfo(QH.Locale.BackupLastSessionStarted)
+    local allCompletedQuests = C_QuestLog.GetAllCompletedQuestIDs()
+    local snapshot = QuestHistoryBackupDB.snapshot or {}
+
+    -- save first snapshot ever
+    if next(snapshot) == nil then
+        for _, questId in ipairs(allCompletedQuests) do
+            snapshot[questId] = true
+        end
+        QuestHistoryBackupDB.snapshot = snapshot
+        QH.LogInfo(QH.Locale.BackupLastSessionFirstRun)
+        return
+    end
+
+    local backupQuests = {}
+    for _, questId in ipairs(allCompletedQuests) do
+        if snapshot[questId] == nil then
+            table.insert(backupQuests, questId)
+            snapshot[questId] = true
+        end
+    end
+
+    if #backupQuests == 0 then
+        QH.LogInfo(QH.Locale.BackupLastSessionNothingToBackup)
+        return
+    end
+
+    local MAX_BACKUP_ENTRIES = 50
+    local backup = QuestHistoryBackupDB.backup or {}
+    backup[time()] = backupQuests
+
+    -- remove oldest if hit the limit
+    local keys = {}
+    for k in pairs(backup) do
+        table.insert(keys, k)
+    end
+
+    if #keys > MAX_BACKUP_ENTRIES then
+        table.sort(keys)
+        backup[keys[1]] = nil
+    end
+
+    QuestHistoryBackupDB.backup = backup
+    QuestHistoryBackupDB.snapshot = snapshot
+    QH.LogInfo(QH.Locale.BackupLastSessionFinished)
+end
+
 -- https://wowpedia.fandom.com/wiki/Events
 -- https://warcraft.wiki.gg/wiki/Events
 QHEventsFrame:RegisterEvent("QUEST_DETAIL")
 QHEventsFrame:RegisterEvent("QUEST_PROGRESS")
 QHEventsFrame:RegisterEvent("QUEST_COMPLETE")
 QHEventsFrame:RegisterEvent("QUEST_TURNED_IN")
+QHEventsFrame:RegisterEvent("PLAYER_LOGIN")
 QHEventsFrame:SetScript("OnEvent", QHEventsFrame.OnEvent)

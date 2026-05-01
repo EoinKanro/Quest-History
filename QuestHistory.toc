@@ -5,7 +5,7 @@
 ## IconTexture: Interface\AddOns\QuestHistory\icon.tga
 ## LoadSavedVariablesFirst: 1
 ## SavedVariables: QuestHistoryQuestsDB
-## SavedVariablesPerCharacter: QuestHistorySettingsDB, QuestHistoryHistoryDB
+## SavedVariablesPerCharacter: QuestHistorySettingsDB, QuestHistoryHistoryDB, QuestHistoryBackupDB
 
 ## Notes: Saves history of completed quests for each character. Then you can export it to json.
 
