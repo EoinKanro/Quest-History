@@ -188,6 +188,44 @@ do
 end
 
 do
+    local exportBackupButton = CreateSettingsButtonInitializer(
+        QH.Locale.SettingsExportBackupSession,
+        QH.Locale.SettingsExport,
+        function()
+            local dates = QH.GetBackupDates()
+            local datesKeys = {}
+            for k in pairs(dates) do
+                table.insert(datesKeys, k)
+            end
+            QH.SortDates(datesKeys)
+
+            local buttons = {}
+            for _, k in ipairs(datesKeys) do
+                local keys = dates[k]
+                local buttonData = {
+                    text = k,
+                    callback = function()
+                        QH.ExportMenuFrame:Hide()
+                        local data = QH.ExportBackup(keys)
+                        QH.ShowExportPopup(data)
+                    end
+                }
+
+                table.insert(buttons, buttonData)
+            end
+
+            QH.ShowExportMenuPopup(buttons)
+        end,
+        QH.Locale.SettingsExportBackupSessionTooltip,
+        true,
+        nil,
+        nil
+    )
+
+    backupLayout:AddInitializer(exportBackupButton)
+end
+
+do
     local name = "Enable debug logging"
     local variable = "QuestHistory_EnableDebugLogging"
     local defaultValue = false

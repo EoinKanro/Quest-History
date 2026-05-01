@@ -176,14 +176,7 @@ function QH.GetDates()
         table.insert(keys, key)
     end
 
-    table.sort(keys, function(a, b)
-        local dayA, monthA, yearA = a:match("(%d+)%.(%d+)%.(%d+)")
-        local dayB, monthB, yearB = b:match("(%d+)%.(%d+)%.(%d+)")
-
-        if yearA ~= yearB then return yearA > yearB end
-        if monthA ~= monthB then return monthA > monthB end
-        return dayA > dayB
-    end)
+    QH.SortDates(keys)
 
     return keys
 end
@@ -238,5 +231,40 @@ function QH.ExportData(date)
         table.insert(result, line)
     end
 
+    return "[" .. table.concat(result, ",\n") .. "]"
+end
+
+-- =========================
+-- Export dates - keys from backup
+-- =========================
+function QH.GetBackupDates()
+    local keys = {}
+
+    local backup = QuestHistoryBackupDB.backup or {}
+    for k in pairs(backup) do
+        local day = date("%d.%m.%Y", k)
+        local dateKeys = keys[day] or {}
+        table.insert(dateKeys, k)
+        keys[day] = dateKeys
+    end
+
+    return keys
+end
+
+-- =========================
+-- Export unsorted ids of the keys from backup
+-- =========================
+function QH.ExportBackup(backupKeys)
+    local backup = QuestHistoryBackupDB.backup or {}
+    local result = {}
+
+    for _, k in ipairs(backupKeys) do
+        local backupData = backup[k]
+        if backupData ~= nil then
+            for _, questId in ipairs(backupData) do
+                table.insert(result, questId)
+            end
+        end
+    end
     return "[" .. table.concat(result, ",\n") .. "]"
 end
