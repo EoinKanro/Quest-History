@@ -2,7 +2,25 @@ if not QH then QH = {} end
 if not QuestHistoryQuestsDB then QuestHistoryQuestsDB = {} end
 if not QuestHistorySettingsDB then QuestHistorySettingsDB = {} end
 
+local npcUnit = "npc"
 local unknown = "Unknown"
+
+local function GetString(str)
+    if str then
+        return tostring(str)
+    end
+    return nil
+end
+
+local function IsQuestIdCorrect(questId, enableDebugLogging)
+    if questId == nil or questId == 0 then
+        if enableDebugLogging == true then
+            QH.LogError(QH.Locale.EventsQuestIdNil)
+        end
+        return false
+    end
+    return true
+end
 
 local function FindQuestStartItemInBag(questId)
     for bag = 0, 4 do
@@ -10,7 +28,7 @@ local function FindQuestStartItemInBag(questId)
             local info = C_Container.GetContainerItemQuestInfo(bag, slot)
             if info ~= nil and info.questID == questId then
                 local itemId = C_Container.GetContainerItemID(bag, slot)
-                return C_Item.GetItemNameByID(itemId)
+                return GetString(C_Item.GetItemNameByID(itemId))
             end
         end
     end
@@ -21,11 +39,11 @@ local function FindQuestStartItemInQuestLog(questId)
     for i = 1, C_QuestLog.GetNumQuestLogEntries() do
         local info = C_QuestLog.GetInfo(i)
         if info ~= nil and info.questID == questId then
-            local link = GetQuestLogSpecialItemInfo(i)
+            local link = GetString(GetQuestLogSpecialItemInfo(i))
             if link ~= nil then
                 local itemId = tonumber(link:match("item:(%d+)"))
                 if itemId ~= nil then
-                    return C_Item.GetItemNameByID(itemId)
+                    return GetString(C_Item.GetItemNameByID(itemId))
                 end
             end
             break
@@ -36,15 +54,12 @@ end
 
 local function GetQuestGiverName(questId, questStartItemID)
     if questStartItemID ~= nil and questStartItemID ~= 0 then
-        return C_Item.GetItemNameByID(questStartItemID)
+        return GetString(C_Item.GetItemNameByID(questStartItemID))
     end
 
-    local npcName = UnitName("npc")
-    if npcName ~= nil then
-        local playerName = UnitName("player")
-        if npcName ~= playerName then
-            return npcName
-        end
+    local npcName = GetString(UnitName(npcUnit))
+    if npcName ~= nil and not UnitIsPlayer(npcUnit) then
+        return npcName
     end
 
     local giver = FindQuestStartItemInBag(questId)
@@ -70,17 +85,14 @@ function QHEventsFrame:QUEST_DETAIL(event, questStartItemID)
     local enableDebugLogging = QuestHistorySettingsDB.enableDebugLogging
 
     local questId = GetQuestID()
-    if questId == nil or questId == 0 then
-        if enableDebugLogging == true then
-            QH.LogError(QH.Locale.EventsQuestIdNil)
-        end
+    if not IsQuestIdCorrect(questId, enableDebugLogging) then
         return
     end
 
-    local title = GetTitleText() or unknown
-    local description = GetQuestText() or unknown
-    local objective = GetObjectiveText() or unknown
-    local location = GetZoneText() or unknown
+    local title = GetString(GetTitleText()) or unknown
+    local description = GetString(GetQuestText()) or unknown
+    local objective = GetString(GetObjectiveText()) or unknown
+    local location = GetString(GetZoneText()) or unknown
 
     local giver = GetQuestGiverName(questId, questStartItemID)
 
@@ -104,14 +116,11 @@ function QHEventsFrame:QUEST_PROGRESS(event)
     local enableDebugLogging = QuestHistorySettingsDB.enableDebugLogging
 
     local questId = GetQuestID()
-    if questId == nil then
-        if enableDebugLogging == true then
-            QH.LogError(QH.Locale.EventsQuestIdNil)
-        end
+    if not IsQuestIdCorrect(questId, enableDebugLogging) then
         return
     end
 
-    local progress = GetProgressText()
+    local progress = GetString(GetProgressText())
     if progress == nil then
         if enableDebugLogging == true then
             QH.LogError(QH.Locale.EventsProgressTextNil)
@@ -134,14 +143,11 @@ function QHEventsFrame:QUEST_COMPLETE(event)
     local enableDebugLogging = QuestHistorySettingsDB.enableDebugLogging
 
     local questId = GetQuestID()
-    if questId == nil then
-        if enableDebugLogging == true then
-            QH.LogError(QH.Locale.EventsQuestIdNil)
-        end
+    if not IsQuestIdCorrect(questId, enableDebugLogging) then
         return
     end
 
-    local complete = GetRewardText()
+    local complete = GetString(GetRewardText())
     if complete == nil then
         if enableDebugLogging == true then
             QH.LogError(QH.Locale.EventsCompleteTextNil)
