@@ -84,7 +84,7 @@ end
 do
     local name = QH.Locale.SettingsEnableBackupToChat
     local variable = "QuestHistory_EnableChatBackup"
-    local defaultValue = true
+    local defaultValue = false
 
     if QuestHistorySettingsDB.enableChatBackup == nil then
         QuestHistorySettingsDB.enableChatBackup = defaultValue
