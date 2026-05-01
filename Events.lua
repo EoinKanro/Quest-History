@@ -206,8 +206,8 @@ function QHEventsFrame:PLAYER_LOGIN(event)
     if savedBackupQuests == nil then
         backup[backupDate] = backupQuests
     else
-        for _, v in ipairs(backupQuests) do
-            table.insert(savedBackupQuests, v)
+        for _, questId in ipairs(backupQuests) do
+            table.insert(savedBackupQuests, questId)
         end
         backup[backupDate] = savedBackupQuests
     end
